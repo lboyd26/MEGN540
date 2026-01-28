@@ -75,6 +75,20 @@ static void _USB_Read_Data()
     // will need to adjust to make it non blocking. You'll need to dig into the library to understand
     // how the function above is working then interact at a slightly lower level, but still higher than
     // register level.
+
+    if (USB_DeviceState != DEVICE_STATE_Configured){
+        return;
+    }
+
+    if (Endpoint_IsOUTReceived()){
+        uint8_t Buffer[Endpoint_BytesInEndpoint()];
+        uint16_t DataLength = Endpoint_BytesInEndpoint();
+
+        Endpoint_Read_Stream_LE( &Buffer, DataLength, NULL);
+        Endpoint_ClearOUT();
+
+    }
+
 }
 
 /**
@@ -88,6 +102,21 @@ static void _USB_Write_Data()
     // will need to adjust to make it non blocking. You'll need to dig into the library to understand
     // how the function above is working then interact at a slightly lower level, but still higher than
     // register level.
+
+    if (USB_DeviceState != DEVICE_STATE_Configured){
+        return;
+    }
+
+    if (Endpoint_IsOUTReceived()){
+        uint8_t Buffer[Endpoint_BytesInEndpoint()];
+        uint16_t DataLength = Endpoint_BytesInEndpoint();
+
+        Endpoint_SelectEndpoint(CDC_TX_EPADDR);
+        Endpoint_Write_Stream_LE(&Buffer, DataLength, NULL)
+        Endpoint_WaitUntilReady();
+        Endpoint_ClearIN();
+    }
+
 }
 
 void Task_USB_Upkeep()
