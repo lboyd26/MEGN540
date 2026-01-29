@@ -92,6 +92,19 @@ void Task_Message_Handling( float _time_since_last )
         case '/':
             if( USB_Msg_Length() >= _Message_Length( '/' ) ) {
                 // then process your divide...
+                // remove first character /
+                USB_Msg_Get();
+
+                struct __attribute__((__packed__)){
+                    float v1;
+                    float v2;
+                } data;
+                
+                USB_Msg_Read_Into( &data, sizeof(data));
+                
+
+
+
 
                 // /* MEGN540 -- LAB 2 */ command_processed = true;
             }
