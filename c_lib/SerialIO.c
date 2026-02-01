@@ -126,8 +126,6 @@ static void _USB_Write_Data()
 	Endpoint_Clear();
 }
 
-}
-
 void Task_USB_Upkeep()
 {
     USB_USBTask();  // lufa internal upkeep task
@@ -272,8 +270,7 @@ void USB_Send_Str( char* p_str )
  * @param p_data [void*] pointer to the data-object to send.
  * @param data_len [uint8_t] size of the data-object to send. Remember sizeof() can help you with this!
  */
-void USB_Send_Msg( char* format, char cmd, void* p_data, uint8_t data_len )
-{
+void USB_Send_Msg( char* format, char cmd, void* p_data, uint8_t data_len ) {
     // *** MEGN540  ***
     // YOUR CODE HERE. Remember c-strings are null terminated. Use the above functions to help!
 
@@ -286,6 +283,19 @@ void USB_Send_Msg( char* format, char cmd, void* p_data, uint8_t data_len )
     //      usb_send_byte <-- cmd
     //      usb_send_data <-- p_data
     // FUNCTION END
+
+    uint8_t format_length = 0;
+    while (format[format_length] != '\0'){
+        format_length++;
+    }
+    format_length++;
+
+    uint8_t total_length = format_length + data_len + 1;
+
+    USB_Send_Byte( total_length );
+    USB_Send_Str( format );
+    USB_Send_Byte( (uint8_t) cmd );
+    USB_Send_Data( p_data, data_len );
 }
 
 /**
@@ -297,7 +307,7 @@ uint8_t USB_Msg_Length()
     // *** MEGN540  ***
     // YOUR CODE HERE
     // This should only interface with the ring buffers and use your ring buffer functions.
-    return 0;
+    return rb_length_B( &usb_receive_buffer );
 }
 
 /**
@@ -309,7 +319,7 @@ uint8_t USB_Msg_Peek()
     // *** MEGN540  ***
     // YOUR CODE HERE
     // This should only interface with the ring buffers and use your ring buffer functions.
-    return 0;
+    return rb_get_B( &usb_receive_buffer, 0 );
 }
 
 /**
@@ -321,7 +331,7 @@ uint8_t USB_Msg_Get()
     // *** MEGN540  ***
     // YOUR CODE HERE
     // This should only interface with the ring buffers and use your ring buffer functions.
-    return 0;
+    return rb_pop_front_B( &usb_receive_buffer );
 }
 
 /**
@@ -338,7 +348,15 @@ bool USB_Msg_Read_Into( void* p_obj, uint8_t data_len )
     // *** MEGN540  ***
     // YOUR CODE HERE
     // This should only interface with the ring buffers and use your ring buffer functions.
-    return false;
+    if (USB_Msg_Length() < data_len) {
+        return false;
+    }
+
+    uint8_t* p_byte = (uint8_t*) p_obj;
+    for (uint8_t i = 0; i < data_len; i++) {
+        p_byte[i] = USB_Msg_Get();
+    }
+    return true;
 }
 
 /**
@@ -350,6 +368,7 @@ void USB_Flush_Input_Buffer()
     // *** MEGN540  ***
     // YOUR CODE HERE
     // This should only interface with the ring buffers and use your ring buffer functions.
+    rb_initialize_B( &usb_receive_buffer );
 }
 
 /** Configures the board hardware and chip peripherals for the demo's functionality. */
