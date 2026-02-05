@@ -75,6 +75,44 @@ static void _USB_Read_Data()
     // will need to adjust to make it non blocking. You'll need to dig into the library to understand
     // how the function above is working then interact at a slightly lower level, but still higher than
     // register level.
+
+        /* Device must be connected and configured for the task to run */
+    if( USB_DeviceState != DEVICE_STATE_Configured )
+        return;
+
+    /* Select the Serial Rx Endpoint */
+    Endpoint_SelectEndpoint( CDC_RX_EPADDR );
+
+    /* Check to see if any data has been received */
+    if( Endpoint_IsOUTReceived() ) {
+        /* Create a temp buffer big enough to hold the incoming endpoint packet */
+        uint8_t Buffer[Endpoint_BytesInEndpoint()];
+
+        /* Remember how large the incoming packet is */
+        uint16_t DataLength = Endpoint_BytesInEndpoint();
+
+        /* Read in the incoming packet into the buffer */
+        Endpoint_Read_Stream_LE( &Buffer, DataLength, NULL );
+
+        /* Finalize the stream transfer to send the last packet */
+        Endpoint_ClearOUT();
+
+        /* Select the Serial Tx Endpoint */
+        Endpoint_SelectEndpoint( CDC_TX_EPADDR );
+
+        /* Write the received data to the endpoint */
+        Endpoint_Write_Stream_LE( &Buffer, DataLength, NULL );
+
+        /* Finalize the stream transfer to send the last packet */
+        Endpoint_ClearIN();
+
+        /* Wait until the endpoint is ready for the next packet */
+        Endpoint_WaitUntilReady();
+
+        /* Send an empty packet to prevent host buffering */
+        Endpoint_ClearIN();
+    }
+
 }
 
 /**
