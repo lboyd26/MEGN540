@@ -83,11 +83,10 @@ static void _USB_Read_Data()
 	Endpoint_SelectEndpoint( CDC_RX_EPADDR );
 
     if (Endpoint_IsOUTReceived()){
-        uint8_t Buffer[Endpoint_BytesInEndpoint()];
         uint16_t DataLength = Endpoint_BytesInEndpoint();
 
         for (uint16_t i = 0; i < DataLength; i++){
-			uint8_t byte = Endpoint_Read_Byte();
+			uint8_t byte = Endpoint_Read_8();
 			rb_push_back_B( &_usb_receive_buffer, byte );
 		}
     }
@@ -120,10 +119,10 @@ static void _USB_Write_Data()
 			}
 
         	uint8_t byte = rb_pop_front_B( &_usb_send_buffer );
-			Endpoint_Write_Byte( byte );
+			Endpoint_Write_8( byte );
 		}
     }
-	Endpoint_Clear();
+	Endpoint_ClearIN();
 }
 
 void Task_USB_Upkeep()
