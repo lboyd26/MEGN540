@@ -23,7 +23,7 @@ void Task_Activate( Task_t* task, float run_period )
     // to identify the task is active
     // set the run_period as proscribed
 
-    task->is_active = !task->is_active;
+    task->is_active = true;
     task->run_period = run_period;
 }
 
@@ -38,7 +38,7 @@ void Task_ReActivate( Task_t* task )
     //****** MEGN540 --  START IN LAB 1, UPDATE IN Lab 2 ******//
     // Here you should change the state of the is_active member and set the time to now (lab 2)
     // to identify the task is active
-    task->is_active = !task->is_active;
+    task->is_active = true;
 }
 
 /** Function Task_Cancel changes the internal state to disable the task **/
@@ -57,7 +57,8 @@ bool Task_Is_Ready( Task_t* task )
 {
     //****** MEGN540 --  START IN LAB 1, UPDATE IN Lab 2 ******//
     // Note a run_period of 0 indicates the task should be run every time if it is active.
-    return task->is_active;  // MEGN540 Update to set the return statement based on is_active and time_last_ran.
+   
+    return true;  // MEGN540 Update to set the return statement based on is_active and time_last_ran.
 }
 
 /**
