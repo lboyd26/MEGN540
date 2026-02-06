@@ -149,8 +149,8 @@ void Task_Message_Handling( float _time_since_last )
             break;
         default:
             // What to do if you dont recognize the command character
-            
-            //USB_Send_Str("Error: Not a valid operation");
+            USB_Msg_Get();
+            USB_Flush_Input_Buffer();
             break;
     }
 
