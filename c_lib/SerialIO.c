@@ -292,8 +292,9 @@ void USB_Send_Msg( char* format, char cmd, void* p_data, uint8_t data_len )
     uint8_t msg_length = format_length + 1 +data_len;
     USB_Send_Byte(msg_length);
     USB_Send_Str(format);
-    USB_Send_Byte(cmd);
+    USB_Send_Byte((uint8_t)cmd);
     USB_Send_Data(p_data, data_len);
+
 }
 
 /**
