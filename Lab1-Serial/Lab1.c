@@ -48,7 +48,7 @@ void Initialize_Modules( float _not_used_ )
     Initialize_Task( &task_restart, Initialize_Modules );
 
     // once you have everythign else working  you can setup the message handling task to be managed by our task management
-    Initialize_Task( &task_message_handling, 0, Task_Message_Handling );
+    Initialize_Task( &task_message_handling, Task_Message_Handling );
 }
 
 /** Main program entry point. This routine configures the hardware required by the application, then
@@ -71,5 +71,19 @@ int main( void )
 
         // Below here you'll process state-machine flags.
         Task_Run_If_Ready( &task_restart );
+
+        // uint8_t operation = USB_Msg_Get();
+        // float left = USB_Msg_Get();
+        // float right = USB_Msg_Get();
+
+        // if (operation == 'x'){
+        //     Multiply_And_Send(left, right);
+        // }else if(operation == "/"){
+        //     Divide_And_Send(left, right);
+        // }else if(operation == "+"){
+        //     Add_And_Send(left, right);
+        // }else if(operation == "-"){
+        //     Subtract_And_Send(left, right);
+        // }
     }
 }

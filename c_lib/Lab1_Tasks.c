@@ -9,3 +9,18 @@ void Multiply_And_Send( float value_left, float value_right )
     // send response right here if appropriate.
     USB_Send_Msg( "cf", '*', &ret_val, sizeof( ret_val ) );
 }
+
+void Divide_And_Send(float value_left, float value_right){
+    float ret_val = value_left / value_right;
+    USB_Send_Msg( "cf", '/', &ret_val, sizeof( ret_val ) );
+}
+
+void Add_And_Send(float value_left, float value_right){
+    float ret_val = value_left + value_right;
+    USB_Send_Msg( "cf", '+', &ret_val, sizeof( ret_val ) );
+}
+
+void Subtract_And_Send(float value_left, float value_right){
+    float ret_val = value_left - value_right;
+    USB_Send_Msg( "cf", '-', &ret_val, sizeof( ret_val ) );
+}

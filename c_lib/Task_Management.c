@@ -87,8 +87,9 @@ bool Task_Run_If_Ready( Task_t* task )
     //
     // Run it if it is ready
 
-    if (task->is_active != NULL){
-        task->time_last_ran = 0.0;
+    if (task->is_active != 0){
+        task->time_last_ran.microsec = 0;
+        task->time_last_ran.millisec = 0;
         return task;
     }
 

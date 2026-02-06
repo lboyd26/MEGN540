@@ -92,13 +92,32 @@ void Task_Message_Handling( float _time_since_last )
         case '/':
             if( USB_Msg_Length() >= _Message_Length( '/' ) ) {
                 // then process your divide...
+                USB_Msg_Get();
 
+                struct __attribute__( ( __packed__ ) ) {
+                    float v1;
+                    float v2;
+                } data;
+
+                USB_Msg_Read_Into( &data, sizeof( data ) );
+
+                Divide_And_Send( data.v1, data.v2 );
                 // /* MEGN540 -- LAB 2 */ command_processed = true;
             }
             break;
         case '+':
             if( USB_Msg_Length() >= _Message_Length( '+' ) ) {
                 // then process your plus...
+                USB_Msg_Get();
+
+                struct __attribute__( ( __packed__ ) ) {
+                    float v1;
+                    float v2;
+                } data;
+
+                USB_Msg_Read_Into( &data, sizeof( data ) );
+
+                Add_And_Send( data.v1, data.v2 );
 
                 // /* MEGN540 -- LAB 2 */ command_processed = true;
             }
@@ -106,6 +125,16 @@ void Task_Message_Handling( float _time_since_last )
         case '-':
             if( USB_Msg_Length() >= _Message_Length( '-' ) ) {
                 // then process your minus...
+                USB_Msg_Get();
+
+                struct __attribute__( ( __packed__ ) ) {
+                    float v1;
+                    float v2;
+                } data;
+
+                USB_Msg_Read_Into( &data, sizeof( data ) );
+
+                Subtract_And_Send( data.v1, data.v2 );
 
                 // /* MEGN540 -- LAB 2 */ command_processed = true;
             }
@@ -113,6 +142,7 @@ void Task_Message_Handling( float _time_since_last )
         case '~':
             if( USB_Msg_Length() >= _Message_Length( '~' ) ) {
                 // then process your reset by setting the task_restart flag defined in Lab1_Tasks.h
+                Task_Run_If_Ready( &task_restart );
 
                 // /* MEGN540 -- LAB 2 */ command_processed = true;
             }

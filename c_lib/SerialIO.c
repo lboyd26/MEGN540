@@ -89,8 +89,8 @@ static void _USB_Read_Data()
 			uint8_t byte = Endpoint_Read_8();
 			rb_push_back_B( &_usb_receive_buffer, byte );
 		}
+        Endpoint_ClearOUT();
     }
-	Endpoint_ClearOUT();
 }
 
 /**
@@ -121,8 +121,8 @@ static void _USB_Write_Data()
         	uint8_t byte = rb_pop_front_B( &_usb_send_buffer );
 			Endpoint_Write_8( byte );
 		}
+        Endpoint_ClearIN();
     }
-	Endpoint_ClearIN();
 }
 
 void Task_USB_Upkeep()
@@ -143,43 +143,6 @@ void Task_USB_Upkeep()
 void Task_USB_Echo( void )
 {
 
-    /* Device must be connected and configured for the task to run */
-    /*if( USB_DeviceState != DEVICE_STATE_Configured )
-        return;
-
-    /* Select the Serial Rx Endpoint */
-    /*Endpoint_SelectEndpoint( CDC_RX_EPADDR );
-
-    /* Check to see if any data has been received */
-    /*if( Endpoint_IsOUTReceived() ) {
-        /* Create a temp buffer big enough to hold the incoming endpoint packet */
-       /* uint8_t Buffer[Endpoint_BytesInEndpoint()];
-
-        /* Remember how large the incoming packet is */
-        /*uint16_t DataLength = Endpoint_BytesInEndpoint();
-
-        /* Read in the incoming packet into the buffer */
-       /* Endpoint_Read_Stream_LE( &Buffer, DataLength, NULL );
-
-        /* Finalize the stream transfer to send the last packet */
-        /*Endpoint_ClearOUT();
-
-        /* Select the Serial Tx Endpoint */
-        /*Endpoint_SelectEndpoint( CDC_TX_EPADDR );
-
-        /* Write the received data to the endpoint */
-        /*Endpoint_Write_Stream_LE( &Buffer, DataLength, NULL );
-
-        /* Finalize the stream transfer to send the last packet */
-        /*Endpoint_ClearIN();
-
-        /* Wait until the endpoint is ready for the next packet */
-       /* Endpoint_WaitUntilReady();
-
-        /* Send an empty packet to prevent host buffering */
-       /* Endpoint_ClearIN();
-    }
-*/
 	if( rb_length_B( &_usb_receive_buffer ) != 0 ){
 		rb_push_back_B( &_usb_send_buffer, rb_pop_front_B( &_usb_receive_buffer ) );
 	}
@@ -306,7 +269,7 @@ uint8_t USB_Msg_Length()
     // *** MEGN540  ***
     // YOUR CODE HERE
     // This should only interface with the ring buffers and use your ring buffer functions.
-    return rb_length_B( &usb_receive_buffer );
+    return rb_length_B( &_usb_receive_buffer );
 }
 
 /**
@@ -318,7 +281,7 @@ uint8_t USB_Msg_Peek()
     // *** MEGN540  ***
     // YOUR CODE HERE
     // This should only interface with the ring buffers and use your ring buffer functions.
-    return rb_get_B( &usb_receive_buffer, 0 );
+    return rb_get_B( &_usb_receive_buffer, 0 );
 }
 
 /**
@@ -330,7 +293,7 @@ uint8_t USB_Msg_Get()
     // *** MEGN540  ***
     // YOUR CODE HERE
     // This should only interface with the ring buffers and use your ring buffer functions.
-    return rb_pop_front_B( &usb_receive_buffer );
+    return rb_pop_front_B( &_usb_receive_buffer );
 }
 
 /**
@@ -367,7 +330,7 @@ void USB_Flush_Input_Buffer()
     // *** MEGN540  ***
     // YOUR CODE HERE
     // This should only interface with the ring buffers and use your ring buffer functions.
-    rb_initialize_B( &usb_receive_buffer );
+    rb_initialize_B( &_usb_receive_buffer );
 }
 
 /** Configures the board hardware and chip peripherals for the demo's functionality. */
