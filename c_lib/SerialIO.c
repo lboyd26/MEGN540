@@ -203,15 +203,29 @@ void USB_Send_Str( char* p_str )
     // YOUR CODE HERE. Remember c-srtings are null terminated, so make sure to send that zero!
     // This should only interface with the ring buffers and use your ring buffer functions.
 
-    if (p_str == NULL) {
+
+	uint8_t i = 0;
+
+	while (p_str[i] != 0){
+		USB_Send_Byte( (uint8_t) p_str[i] );
+		i++;
+	}
+
+	USB_Send_Byte( 0 );
+
+
+    /*
+     if (p_str == NULL) {
         return;
     }
 
 	while (*p_str != '\0'){
 		rb_push_back_B(&_usb_send_buffer, (uint8_t)*p_str);
+        p_str++;
 	}
 
 	rb_push_back_B(&_usb_receive_buffer, '\0');
+    */
 
 }
 
