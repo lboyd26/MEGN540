@@ -74,7 +74,7 @@ void Task_Run( Task_t* task )
     // Update time_last_ran and is_active as appropriate.
     // Note that a negative run_period indicates the task should only be performed once, while
     // a run_period of 0 indicates the task should be run every time if it is active.
-    if(task->task_fcn_ptr != NULL){
+    if(task->task_fcn_ptr != 0){
         task->task_fcn_ptr(0.0);
     }
     if( task->run_period < 0){
