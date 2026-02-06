@@ -80,6 +80,7 @@ void Task_Run( Task_t* task )
     if( task->run_period < 0){
         task->is_active = false;
     }
+    
 }
 
 /** Function Task_Run_If_Ready Function Task_Run_If_Ready checks to see if the given task is ready for execution, executes the task,
