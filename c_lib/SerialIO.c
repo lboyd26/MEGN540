@@ -203,14 +203,15 @@ void USB_Send_Str( char* p_str )
     // YOUR CODE HERE. Remember c-srtings are null terminated, so make sure to send that zero!
     // This should only interface with the ring buffers and use your ring buffer functions.
 
-	uint8_t i = 0;
+    if (p_str == NULL) {
+        return;
+    }
 
-	while (p_str[i] != '\0'){
-		USB_Send_Byte( (uint8_t) p_str[i] );
-		i++;
+	while (*p_str != '\0'){
+		rb_push_back_B(&_usb_send_buffer, (uint8_t)*p_str);
 	}
 
-	USB_Send_Byte( '\0' );
+	rb_push_back_B(&_usb_receive_buffer, '\0');
 
 }
 
@@ -330,7 +331,10 @@ void USB_Flush_Input_Buffer()
     // *** MEGN540  ***
     // YOUR CODE HERE
     // This should only interface with the ring buffers and use your ring buffer functions.
-    rb_initialize_B( &_usb_receive_buffer );
+    while (rb_length_B( &_usb_receive_buffer )> 0){
+        rb_pop_front_B( &_usb_receive_buffer );
+    }
+    //rb_initialize_B( &_usb_receive_buffer );
 }
 
 /** Configures the board hardware and chip peripherals for the demo's functionality. */
