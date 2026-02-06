@@ -92,7 +92,7 @@ static void _USB_Read_Data()
         uint16_t DataLength = Endpoint_BytesInEndpoint();
 
         /* Read in the incoming packet into the buffer */
-        Endpoint_Read_Stream_LE( &_usb_receive_buffer, DataLength, NULL );
+        Endpoint_Read_Stream_LE( &Buffer, DataLength, NULL );
 
         /* Finalize the stream transfer to send the last packet */
         Endpoint_ClearOUT();

@@ -58,7 +58,7 @@ bool Task_Is_Ready( Task_t* task )
     //****** MEGN540 --  START IN LAB 1, UPDATE IN Lab 2 ******//
     // Note a run_period of 0 indicates the task should be run every time if it is active.
    
-    return true;  // MEGN540 Update to set the return statement based on is_active and time_last_ran.
+    return task->is_active;  // MEGN540 Update to set the return statement based on is_active and time_last_ran.
 }
 
 /**
@@ -74,7 +74,12 @@ void Task_Run( Task_t* task )
     // Update time_last_ran and is_active as appropriate.
     // Note that a negative run_period indicates the task should only be performed once, while
     // a run_period of 0 indicates the task should be run every time if it is active.
-    ;
+    if(task->task_fcn_ptr != NULL){
+        task->task_fcn_ptr(0.0);
+    }
+    if( task->run_period < 0){
+        task->is_active = false;
+    }
 }
 
 /** Function Task_Run_If_Ready Function Task_Run_If_Ready checks to see if the given task is ready for execution, executes the task,
@@ -88,6 +93,10 @@ bool Task_Run_If_Ready( Task_t* task )
     // Check to see if the task is ready to run.
     //
     // Run it if it is ready
+    if(Task_Is_Ready(task)){
+        Task_Run(task);
+        return true;
+    }
 
-    return task->is_active;  // true if it ran, false if it did not run
+    return false;  // true if it ran, false if it did not run
 }
