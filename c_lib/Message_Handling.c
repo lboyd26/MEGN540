@@ -54,7 +54,7 @@ void Task_Message_Handling( float _time_since_last )
     if( !USB_Msg_Length() )
         return;  // nothing to process...
 
-    // Get Your command designator without removal so if their are not enough
+    // Get Your command designator without removal so if there are not enough
     // bytes yet, the command persists
     char command = USB_Msg_Peek();
 

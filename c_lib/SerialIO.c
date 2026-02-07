@@ -129,7 +129,7 @@ static void _USB_Write_Data()
         uint8_t DataLength = rb_length_B(&_usb_send_buffer);
         uint8_t Buffer[DataLength];
 
-        for(uint8_t i =0; i < DataLength; i++){
+        for(uint8_t i = 0; i < DataLength; i++){
             Buffer[i] = rb_pop_front_B(&_usb_send_buffer);
         }
 
@@ -289,7 +289,7 @@ void USB_Send_Msg( char* format, char cmd, void* p_data, uint8_t data_len )
     // FUNCTION END
 
     uint8_t format_length = strlen(format) + 1;
-    uint8_t msg_length = format_length + 1 +data_len;
+    uint8_t msg_length = format_length + 1 + data_len;
     USB_Send_Byte(msg_length);
     USB_Send_Str(format);
     USB_Send_Byte((uint8_t)cmd);
@@ -381,7 +381,7 @@ void Initialize_USB( void )
 
     // THE following is LUFA specific setup to make sure the
     // watchdog timer is not active as we are not actively resetting it
-    // It then goes and initializes the USB hardware redgesters and turns
+    // It then goes and initializes the USB hardware registers and turns
     // on interrupt handeling (since lufa uses interrupts).
 
 #if( ARCH == ARCH_AVR8 )

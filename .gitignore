@@ -201,3 +201,7 @@ cython_debug/
 
 
 *.idea*
+
+
+# Lab 1 Description File
+Lab1-Serial/README.txt
