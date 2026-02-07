@@ -147,12 +147,15 @@ void Task_Message_Handling( float _time_since_last )
                 // then process your reset by setting the task_restart flag defined in Lab1_Tasks.h
                 USB_Msg_Get();
                 Task_Activate(&task_restart, -1);
+                USB_Send_Byte((uint8_t)'0')
                 // /* MEGN540 -- LAB 2 */ command_processed = true;
             }
             break;
         default:
             // What to do if you dont recognize the command character
             USB_Msg_Get();
+            USB_Send_Byte((uint8_t)'?');
+            USB_Flush_Input_Buffer();
             break;
     }
 
