@@ -54,6 +54,13 @@ void Initialize_Timing()
     // YOUR CODE HERE
     // Enable timing, setup prescalers, etc.
 
+    // Prescalar register is TCCR0B. Flip both 
+    // CS00 and CS01 for a prescaler of 64.
+    TCCR0B |= (1 << CS00) | (1 << CS01);
+
+    // Set the timer counter value to 0
+    TCNT0 = 0; 
+
     _count_ms = 0;
 }
 
