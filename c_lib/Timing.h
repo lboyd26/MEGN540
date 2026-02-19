@@ -79,6 +79,6 @@ float  Timing_Get_Time_Sec();
  * @param p_time_start a pointer to a start time struct
  * @return (Time_t) Time since the other time.
  */
-float  Timing_Seconds_Since(const Time_t* time_start_p );
+float  Timing_Seconds_Since(const Time_t* p_time_start );
 
 #endif //LAB2_TIMING_TIMING_H

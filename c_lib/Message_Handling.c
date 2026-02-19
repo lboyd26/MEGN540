@@ -39,6 +39,16 @@
 static uint8_t _Message_Length( char cmd );
 
 /**
+ * Function MSG_FLAG_Execute indicates if the action associated with the message flag
+should be executed in the main loop both because its active and because its time.
+ */
+bool MSG_FLAG_Execute( MSG_FLAG_t* p_flag) {
+    // OUR CODE HERE:
+
+
+}
+
+/**
  * Function Task_Message_Handling processes USB messages as necessary and sets
  * status flags to control the flow of the program.
  */
@@ -58,7 +68,7 @@ void Task_Message_Handling( float _time_since_last )
     // bytes yet, the command persists
     char command = USB_Msg_Peek();
 
-    // /* MEGN540 -- LAB 2 */ bool command_processed = false;
+     /* MEGN540 -- LAB 2 */ bool command_processed = false;
 
     // process command
     switch( command ) {
@@ -86,7 +96,7 @@ void Task_Message_Handling( float _time_since_last )
                 // Call MEGN540_Lab_Task Function
                 Multiply_And_Send( data.v1, data.v2 );
 
-                // /* MEGN540 -- LAB 2 */ command_processed = true;
+                 /* MEGN540 -- LAB 2 */ command_processed = true;
             }
             break;
         case '/':
@@ -105,7 +115,7 @@ void Task_Message_Handling( float _time_since_last )
                 Divide_And_Send(data.v1, data.v2);
                 
 
-                // /* MEGN540 -- LAB 2 */ command_processed = true;
+                 /* MEGN540 -- LAB 2 */ command_processed = true;
             }
             break;
         case '+':
@@ -121,7 +131,7 @@ void Task_Message_Handling( float _time_since_last )
                 USB_Msg_Read_Into(& data, sizeof(data));
                 Add_And_Send(data.v1, data.v2);
 
-                // /* MEGN540 -- LAB 2 */ command_processed = true;
+                 /* MEGN540 -- LAB 2 */ command_processed = true;
             }
             break;
         case '-':
@@ -139,7 +149,7 @@ void Task_Message_Handling( float _time_since_last )
 
 
 
-                // /* MEGN540 -- LAB 2 */ command_processed = true;
+                 /* MEGN540 -- LAB 2 */ command_processed = true;
             }
             break;
         case '~':
@@ -148,7 +158,50 @@ void Task_Message_Handling( float _time_since_last )
                 USB_Msg_Get();
                 Task_Activate(&task_restart, -1);
                 USB_Send_Msg("c",'0',NULL,0);
-                // /* MEGN540 -- LAB 2 */ command_processed = true;
+                 /* MEGN540 -- LAB 2 */ command_processed = true;
+            }
+            break;
+        // LAB 2 CASES: ----------------------------------------------------------------------------
+        case 't':
+            if( USB_Msg_Length() >= _Message_Length( 't' ) ) {
+                // then process your divide...
+                // remove first character /
+                USB_Msg_Get();
+
+                struct __attribute__((__packed__)){
+                    char v1;
+                    char v2;
+                } data;
+                
+                USB_Msg_Read_Into( &data, sizeof(data));
+
+                Fetch_and_Send_little_t(data.v1, data.v2);
+                
+                
+                 /* MEGN540 -- LAB 2 */ command_processed = true;
+                
+            }
+            break;
+
+        case 'T':
+            if( USB_Msg_Length() >= _Message_Length( 'T' ) ) {
+                // then process your divide...
+                // remove first character /
+                USB_Msg_Get();
+
+                struct __attribute__((__packed__)){
+                    char v1;
+                    char v2;
+                    float v3;
+                } data;
+                
+                USB_Msg_Read_Into( &data, sizeof(data));
+
+                Fetch_and_Send_big_T(data.v1, data.v2, data.v3);
+                
+
+                 /* MEGN540 -- LAB 2 */ command_processed = true;
+                
             }
             break;
         default:
@@ -160,10 +213,10 @@ void Task_Message_Handling( float _time_since_last )
     }
 
     //********* MEGN540 -- LAB 2 ************//
-    // if( command_processed ) {
-    //     // RESET the WATCHDOG TIMER
-    //     Task_Activate( &task_message_handling_watchdog );
-    // }
+    if( command_processed ) {
+        // RESET the WATCHDOG TIMER
+        Task_Activate( &task_message_handling_watchdog );
+    }
 }
 
 /**
