@@ -54,14 +54,18 @@ void Initialize_Timing()
     // YOUR CODE HERE
     // Enable timing, setup prescalers, etc.
 
+    _count_ms = 0;
+
+    // ---Jw Code---
     // Prescalar register is TCCR0B. Flip both 
     // CS00 and CS01 for a prescaler of 64.
     TCCR0B |= (1 << CS00) | (1 << CS01);
 
     // Set the timer counter value to 0
+    // This is counting ticks. One tick every 4 micro-secs.
     TCNT0 = 0; 
 
-    _count_ms = 0;
+    
 }
 
 /**
@@ -72,15 +76,26 @@ float Timing_Get_Time_Sec()
 {
     // *** MEGN540 Lab 2 ***
     // YOUR CODE HERE
-    return 0;
+
+    // ---Q Code---
+    // Returns time in seconds = ticks * 4us/tick * (1 s / 1000000 us)
+    return TCNT0*4 / 1000000;
 }
+
 Time_t Timing_Get_Time()
 {
     // *** MEGN540 Lab 2 ***
     // YOUR CODE HERE
+
+    // Initializes instance of Time_t struct "time"
+    // Uses "designated initializer" syntax...
     Time_t time = {
         .millisec = _count_ms,
-        .microsec = 0  // YOU NEED TO REPLACE THIS WITH A CALL TO THE TIMER0 REGISTER AND MULTIPLY APPROPRIATELY
+        // ---Q Code---
+        // 4 us resolution so ticks * 4 us/tick = us
+        .microsec = TCNT0*4;  // Prof: YOU NEED TO REPLACE THIS WITH A CALL TO THE TIMER0 REGISTER AND MULTIPLY APPROPRIATELY
+        
+        // Q: WHY NOT JUST CONVERT _count_ms TO MICROSEC? ******************************************
     };
 
     return time;
@@ -99,32 +114,39 @@ uint16_t Timing_Get_Micro()
 {
     // *** MEGN540 Lab 2 ***
     // YOUR CODE HERE
-    return 0;  // YOU NEED TO REPLACE THIS WITH A CALL TO THE TIMER0 REGISTER AND MULTIPLY APPROPRIATELY
+
+    // ---Q Code---
+    return TCNT0*4;  // Prof: YOU NEED TO REPLACE THIS WITH A CALL TO THE TIMER0 REGISTER AND MULTIPLY APPROPRIATELY
 }
 
 /**
  * This function takes a start time and calculates the time since that time, it returns it in the Time struct.
  * @param p_time_start a pointer to a start time struct
- * @return (Time_t) Time since the other time.
+ * @return (Time_t) Time since the other time. (The return is a float ***************************************)
  */
 float Timing_Seconds_Since( const Time_t* time_start_p )
 {
     // *** MEGN540 Lab 2 ***
     // YOUR CODE HERE
-    float delta_time = 0;
+    // ---Q Code---
+    float delta_time = _count_ms - time_start_p->millisec;
     return delta_time;
 }
 
 /** This is the Interrupt Service Routine for the Timer0 Compare A feature.
  * You'll need to set the compare flags properly for it to work.
  */
-/*ISR( DEFINE THE COMPARISON TRIGGER )
+// NOT SURE IF THIS IN THE () IS RIGHT -Q **********************************
+ISR( TIMER0_COMPA_vect )
 {
     // *** MEGN540 Lab 2 ***
     // YOUR CODE HERE
+
+    // ---Q Code---
     // YOU NEED TO RESET THE Timer0 Value to 0 again!
+    TCNT0 = 0;
 
     // take care of upticks of both our internal and external variables.
     _count_ms ++;
 
-}*/
+}
