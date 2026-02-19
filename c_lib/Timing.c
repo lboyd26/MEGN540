@@ -61,7 +61,7 @@ void Initialize_Timing()
 
     // Set Timer0 to Comapre Match Mode (CTC). 
     // TCCR0A register contains CTC mode. 
-    TCCR0A |= (1 << WMG01)
+    TCCR0A |= (1 << WGM01);
 
     // Set the timer counter value to 0
     // This is counting ticks. One tick every 4 micro-secs.
@@ -113,7 +113,7 @@ Time_t Timing_Get_Time()
         * current time by unsing the TCNT0 timer (in microseconds)
         * and multiply it by the prescaled tick period, 4 us. 
         */    
-        .microsec = (_count_ms * 1000) + (TCNT0 * 4)  
+        .microsec = (_count_ms * 1000.0) + (TCNT0 * 4)  
     };
 
     return time;
@@ -151,7 +151,7 @@ uint16_t Timing_Get_Micro()
  * @param p_time_start a pointer to a start time struct
  * @return (Time_t) Time since the other time. (The return is a float ***************************************)
  */
-float Timing_Seconds_Since( const Time_t* time_start_p )
+float Timing_Seconds_Since( const Time_t* p_time_start )
 {
     // *** MEGN540 Lab 2 ***
     // YOUR CODE HERE
@@ -171,7 +171,7 @@ ISR(TIMER0_COMPA_vect)
 
     // ---Q Code---
     // YOU NEED TO RESET THE Timer0 Value to 0 again!
-    TCNT0 = 0;
+    TCNT0 = 0; 
 
     // take care of upticks of both our internal and external variables.
     _count_ms ++;
