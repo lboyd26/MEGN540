@@ -72,13 +72,10 @@ void Initialize_Timing()
     TIMSK0 contains an Output Compare Match A bit. Shift said bit 
     to enable interrupt.
     */ 
-   // What is this?? -Q ******************************************************************
+    // What is this?? -Q ******************************************************************
     TIMSK0 |= (1 << OCIE0A); 
 
     _count_ms = 0;
-
-    // Enable global interrupts
-    sei();
 
     // Enable global interrupts
     sei();
@@ -100,14 +97,6 @@ float Timing_Get_Time_Sec()
     Time_t time = Timing_Get_Time(); 
     float sec = time.millisec/1000.0; 
     return sec;
-
-    /* Access the time struct 
-    * and convers the milliseconds to 
-    * seconds.
-    */
-    Time_t time = Timing_Get_Time(); 
-    float sec = time.millisec/1000.0; 
-    return sec;
 }
 
 Time_t Timing_Get_Time()
@@ -117,17 +106,8 @@ Time_t Timing_Get_Time()
 
     // Initializes instance of Time_t struct "time"
     // Uses "designated initializer" syntax...
-
-    // Initializes instance of Time_t struct "time"
-    // Uses "designated initializer" syntax...
     Time_t time = {
         .millisec = _count_ms,
-
-        /* Convert __count_ms to microseconds, then get the 
-        * current time by unsing the TCNT0 timer (in microseconds)
-        * and multiply it by the prescaled tick period, 4 us. 
-        */    
-        .microsec = (_count_ms * 1000.0) + (TCNT0 * 4)  
 
         /* Convert __count_ms to microseconds, then get the 
         * current time by unsing the TCNT0 timer (in microseconds)
@@ -152,12 +132,6 @@ uint32_t Timing_Get_Milli()
     */
     Time_t time = Timing_Get_Time(); 
     return time.millisec;
-    /* Access the individual 
-    * parts of the time struct
-    * by returning them individually. 
-    */
-    Time_t time = Timing_Get_Time(); 
-    return time.millisec;
 }
 uint16_t Timing_Get_Micro()
 {
@@ -169,20 +143,12 @@ uint16_t Timing_Get_Micro()
     * by returning them individually. 
     */
     Time_t time = Timing_Get_Time(); 
-    return time.microsec; 
-
-    /* Access the individual 
-    * parts of the time struct
-    * by returning them individually. 
-    */
-    Time_t time = Timing_Get_Time(); 
-    return time.microsec; 
+    return time.microsec;  
 }
 
 /**
  * This function takes a start time and calculates the time since that time, it returns it in the Time struct.
  * @param p_time_start a pointer to a start time struct
- * @return (Time_t) Time since the other time. (The return is a float ***************************************)
  * @return (Time_t) Time since the other time. (The return is a float ***************************************)
  */
 float Timing_Seconds_Since( const Time_t* time_start_p)
@@ -204,14 +170,11 @@ ISR(TIMER0_COMPA_vect)
     // YOUR CODE HERE
 
     // ---Q Code---
-
-    // ---Q Code---
     // YOU NEED TO RESET THE Timer0 Value to 0 again!
-    TCNT0 = 0; 
     TCNT0 = 0; 
 
     // take care of upticks of both our internal and external variables.
     _count_ms ++;
 
 }
-}
+
