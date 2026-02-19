@@ -79,10 +79,13 @@ int main( void )
 
     for( ;; ) {  // yet another way to do while (true)
         Task_USB_Upkeep();
+        // New task that tracks how long since last loop cyclce so since last time that task ran
+        // Repeptiton also, so 2 tasks.
 
         Task_Run_If_Ready( &task_message_handling );
         Task_Run_If_Ready( &task_restart );
 
+        // Use this watchdog as the 100 ms no answer, buffer flush thing from the lab PDF
         // Task_Run_If_Ready( &task_message_handling_watchdog );
     }
 }

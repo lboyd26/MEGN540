@@ -72,7 +72,6 @@ void Initialize_Timing()
     TIMSK0 contains an Output Compare Match A bit. Shift said bit 
     to enable interrupt.
     */ 
-   // What is this?? -Q ******************************************************************
     TIMSK0 |= (1 << OCIE0A); 
 
     _count_ms = 0;
@@ -156,7 +155,7 @@ float Timing_Seconds_Since( const Time_t* p_time_start )
     // *** MEGN540 Lab 2 ***
     // YOUR CODE HERE
     // ---Q Code---
-    float delta_time = (_count_ms - time_start_p->millisec) / 1000;
+    float delta_time = (_count_ms - p_time_start->millisec) / 1000;
     return delta_time;
 }
 

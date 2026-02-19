@@ -52,17 +52,17 @@ Task_t task_message_handling_watchdog;  ///<-- LAB 2: Watchdog Timer for Flusing
 void Send_Loop_Time( float _time_since_last );
 void Send_Time_Now( float _time_since_last );
 
-/**
- * Return the time it requested followed by the time to complete the action specified by the second imput char. 
- * 0x00 -> Time Now 
- * 0x01 -> Time to complete a full loop iteration
- */
-void Fetch_and_Send_little_t(char time_now, char time_loop);
+// /**
+//  * Return the time it requested followed by the time to complete the action specified by the second imput char. 
+//  * 0x00 -> Time Now 
+//  * 0x01 -> Time to complete a full loop iteration
+//  */
+// void Fetch_and_Send_little_t(char time_now, char time_loop);
 
-/**
- * Return the time it requested followed by the time to complete the action specified by the second imput char and 
- * returns the time every X milliseconds. If the time is zero or negative it canceles the request.
- */
-void Fetch_and_Send_big_T(char time_now, char time_loop, float everyX);
+// /**
+//  * Return the time it requested followed by the time to complete the action specified by the second imput char and 
+//  * returns the time every X milliseconds. If the time is zero or negative it canceles the request.
+//  */
+// void Fetch_and_Send_big_T(char time_now, char time_loop, float everyX);
 
 #endif  // ifndef LAB2_TASKS_H
