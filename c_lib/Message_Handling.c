@@ -168,14 +168,16 @@ void Task_Message_Handling( float _time_since_last )
                 // remove first character /
                 USB_Msg_Get();
 
-                struct __attribute__((__packed__)){
-                    char v1;
-                    char v2;
-                } data;
+                // Get the number character: 0 - Time Now; 1 - Time of loop iteration
+                //---------->>>
+                
+                // THE GIST:
+                // Return time right now plus input char request. SO, could be the 0x00 -> give the time now again...
+                // OR 0x01 -> give the time that the last loop took via having a task track the looping time.
                 
                 USB_Msg_Read_Into( &data, sizeof(data));
 
-                Fetch_and_Send_little_t(data.v1, data.v2);
+                //Dont use this function... Fetch_and_Send_little_t(data.v1, data.v2); There already funcs defined in the Lab2-Tasks.h file.
                 
                 
                  /* MEGN540 -- LAB 2 */ command_processed = true;
@@ -189,15 +191,18 @@ void Task_Message_Handling( float _time_since_last )
                 // remove first character /
                 USB_Msg_Get();
 
-                struct __attribute__((__packed__)){
-                    char v1;
-                    char v2;
-                    float v3;
-                } data;
+                // Get the number character: 0 - Time Now; 1 - Time of loop iteration
+                //---------->>>
+                
+                // THE GIST:
+                // Basically everything little t did plus the time of every X milliseconnds using another task that will activate every pass through the loop
+                //      Maybe turn the repetition task on and off as necessary.
+                // Return time right now plus input char request. SO, could be the 0x00 -> give the time now again...
+                // OR 0x01 -> give the time that the last loop took via having a task track the looping time.
                 
                 USB_Msg_Read_Into( &data, sizeof(data));
 
-                Fetch_and_Send_big_T(data.v1, data.v2, data.v3);
+                //Dont use this function... Fetch_and_Send_big_T(data.v1, data.v2); There already funcs defined in the Lab2-Tasks.h file.
                 
 
                  /* MEGN540 -- LAB 2 */ command_processed = true;
