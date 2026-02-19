@@ -54,8 +54,6 @@ void Initialize_Timing()
     // YOUR CODE HERE
     // Enable timing, setup prescalers, etc.
 
-    _count_ms = 0;
-
     // ---Jw Code---
     // Prescalar register is TCCR0B. Flip both 
     // CS00 and CS01 for a prescaler of 64.
@@ -74,9 +72,13 @@ void Initialize_Timing()
     TIMSK0 contains an Output Compare Match A bit. Shift said bit 
     to enable interrupt.
     */ 
+   // What is this?? -Q ******************************************************************
     TIMSK0 |= (1 << OCIE0A); 
 
     _count_ms = 0;
+
+    // Enable global interrupts
+    sei();
 }
 
 /**
