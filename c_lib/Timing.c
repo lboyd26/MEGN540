@@ -53,6 +53,11 @@ void Initialize_Timing()
     // *** MEGN540 Lab 2 ***
     // YOUR CODE HERE
     // Enable timing, setup prescalers, etc.
+    TCCR0A = (1 << WGM01);
+    TCCR0B = (1 << CS01) | (1 << CS00);
+    OCR0A = 249;
+    TIMSK0 = (1 << OCIE0A);
+    sei();
 
     _count_ms = 0;
 }
@@ -65,16 +70,22 @@ float Timing_Get_Time_Sec()
 {
     // *** MEGN540 Lab 2 ***
     // YOUR CODE HERE
-    return 0;
+    cli();
+    uint32_t time = _count_ms;
+    sei();
+
+    return time / 1000.0;
 }
 Time_t Timing_Get_Time()
 {
     // *** MEGN540 Lab 2 ***
     // YOUR CODE HERE
+    cli();
     Time_t time = {
         .millisec = _count_ms,
-        .microsec = 0  // YOU NEED TO REPLACE THIS WITH A CALL TO THE TIMER0 REGISTER AND MULTIPLY APPROPRIATELY
+        .microsec = TCNT0 * 4  // YOU NEED TO REPLACE THIS WITH A CALL TO THE TIMER0 REGISTER AND MULTIPLY APPROPRIATELY
     };
+    sei();
 
     return time;
 }
@@ -92,7 +103,7 @@ uint16_t Timing_Get_Micro()
 {
     // *** MEGN540 Lab 2 ***
     // YOUR CODE HERE
-    return 0;  // YOU NEED TO REPLACE THIS WITH A CALL TO THE TIMER0 REGISTER AND MULTIPLY APPROPRIATELY
+    return TCNT0 * 4;  // YOU NEED TO REPLACE THIS WITH A CALL TO THE TIMER0 REGISTER AND MULTIPLY APPROPRIATELY
 }
 
 /**
@@ -104,20 +115,24 @@ float Timing_Seconds_Since( const Time_t* time_start_p )
 {
     // *** MEGN540 Lab 2 ***
     // YOUR CODE HERE
-    float delta_time = 0;
+    Time_t time = Timing_Get_Time();
+    float delta_milli = (time.millisec - time_start_p->millisec);
+    float delta_micro = (time.microsec - time_start_p->microsec);
+    float delta_time = delta_milli / 1000.0 + delta_micro / 1000000.0;
     return delta_time;
 }
 
 /** This is the Interrupt Service Routine for the Timer0 Compare A feature.
  * You'll need to set the compare flags properly for it to work.
  */
-/*ISR( DEFINE THE COMPARISON TRIGGER )
+ISR( TIMER0_COMPA_vect )
 {
     // *** MEGN540 Lab 2 ***
     // YOUR CODE HERE
     // YOU NEED TO RESET THE Timer0 Value to 0 again!
+    TCNT0 = 0;
 
     // take care of upticks of both our internal and external variables.
     _count_ms ++;
 
-}*/
+}
