@@ -54,7 +54,31 @@ void Initialize_Timing()
     // YOUR CODE HERE
     // Enable timing, setup prescalers, etc.
 
+    // ---Jw Code---
+    // Prescalar register is TCCR0B. Flip both
+    // CS00 and CS01 for a prescaler of 64.
+    TCCR0B |= (1 << CS00) | (1 << CS01);
+
+    // Set Timer0 to Comapre Match Mode (CTC). 
+    // TCCR0A register contains CTC mode. 
+    TCCR0A |= (1 << WGM01);
+
+    // Set the timer counter value to 0
+    // This is counting ticks. One tick every 4 micro-secs.
+    TCNT0 = 0; 
+
+    /*
+    Initialize Output Compare A (ISR comment specifies Compare A)
+    TIMSK0 contains an Output Compare Match A bit. Shift said bit 
+    to enable interrupt.
+    */ 
+   // What is this?? -Q ******************************************************************
+    TIMSK0 |= (1 << OCIE0A); 
+
     _count_ms = 0;
+
+    // Enable global interrupts
+    sei();
 }
 
 /**
@@ -65,15 +89,31 @@ float Timing_Get_Time_Sec()
 {
     // *** MEGN540 Lab 2 ***
     // YOUR CODE HERE
-    return 0;
+
+    /* Access the time struct 
+    * and convers the milliseconds to 
+    * seconds.
+    */
+    Time_t time = Timing_Get_Time(); 
+    float sec = time.millisec/1000.0; 
+    return sec;
 }
+
 Time_t Timing_Get_Time()
 {
     // *** MEGN540 Lab 2 ***
     // YOUR CODE HERE
+
+    // Initializes instance of Time_t struct "time"
+    // Uses "designated initializer" syntax...
     Time_t time = {
         .millisec = _count_ms,
-        .microsec = 0  // YOU NEED TO REPLACE THIS WITH A CALL TO THE TIMER0 REGISTER AND MULTIPLY APPROPRIATELY
+
+        /* Convert __count_ms to microseconds, then get the 
+        * current time by unsing the TCNT0 timer (in microseconds)
+        * and multiply it by the prescaled tick period, 4 us. 
+        */    
+        .microsec = (_count_ms * 1000.0) + (TCNT0 * 4)  
     };
 
     return time;
@@ -86,38 +126,54 @@ Time_t Timing_Get_Time()
  */
 uint32_t Timing_Get_Milli()
 {
-    return _count_ms;
+    /* Access the individual 
+    * parts of the time struct
+    * by returning them individually. 
+    */
+    Time_t time = Timing_Get_Time(); 
+    return time.millisec;
 }
 uint16_t Timing_Get_Micro()
 {
     // *** MEGN540 Lab 2 ***
     // YOUR CODE HERE
-    return 0;  // YOU NEED TO REPLACE THIS WITH A CALL TO THE TIMER0 REGISTER AND MULTIPLY APPROPRIATELY
+
+    /* Access the individual 
+    * parts of the time struct
+    * by returning them individually. 
+    */
+    Time_t time = Timing_Get_Time(); 
+    return time.microsec; 
 }
 
 /**
  * This function takes a start time and calculates the time since that time, it returns it in the Time struct.
  * @param p_time_start a pointer to a start time struct
- * @return (Time_t) Time since the other time.
+ * @return (Time_t) Time since the other time. (The return is a float ***************************************)
  */
-float Timing_Seconds_Since( const Time_t* time_start_p )
+float Timing_Seconds_Since( const Time_t* time_start_p)
 {
     // *** MEGN540 Lab 2 ***
     // YOUR CODE HERE
-    float delta_time = 0;
+    // ---Q Code---
+    float delta_time = _count_ms - time_start_p->millisec;
     return delta_time;
 }
 
 /** This is the Interrupt Service Routine for the Timer0 Compare A feature.
  * You'll need to set the compare flags properly for it to work.
- */
-/*ISR( DEFINE THE COMPARISON TRIGGER )
+ **/
+// THIS IS PROBABLY WRONG -Q *****************************************************************
+ISR(TIMER0_COMPA_vect)
 {
     // *** MEGN540 Lab 2 ***
     // YOUR CODE HERE
+
+    // ---Q Code---
     // YOU NEED TO RESET THE Timer0 Value to 0 again!
+    TCNT0 = 0; 
 
     // take care of upticks of both our internal and external variables.
     _count_ms ++;
 
-}*/
+}
