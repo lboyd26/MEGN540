@@ -39,6 +39,16 @@
 static uint8_t _Message_Length( char cmd );
 
 /**
+ * Function MSG_FLAG_Execute indicates if the action associated with the message flag
+should be executed in the main loop both because its active and because its time.
+ */
+bool MSG_FLAG_Execute( MSG_FLAG_t* p_flag) {
+    // OUR CODE HERE:
+
+
+}
+
+/**
  * Function Task_Message_Handling processes USB messages as necessary and sets
  * status flags to control the flow of the program.
  */
@@ -149,6 +159,49 @@ void Task_Message_Handling( float _time_since_last )
                 Task_Activate(&task_restart, -1);
                 USB_Send_Msg("c",'0',NULL,0);
                 // /* MEGN540 -- LAB 2 */ command_processed = true;
+            }
+            break;
+        // LAB 2 CASES: ----------------------------------------------------------------------------
+        case 't':
+            if( USB_Msg_Length() >= _Message_Length( 't' ) ) {
+                // then process your divide...
+                // remove first character /
+                USB_Msg_Get();
+
+                struct __attribute__((__packed__)){
+                    char v1;
+                    char v2;
+                } data;
+                
+                USB_Msg_Read_Into( &data, sizeof(data));
+
+                Fetch_and_Send_little_t(data.v1, data.v2);
+                
+                
+                // /* MEGN540 -- LAB 2 */ command_processed = true;
+                // WHAT TO DO WITH THIS? ^^^ -Q ************************************************
+            }
+            break;
+
+        case 'T':
+            if( USB_Msg_Length() >= _Message_Length( 'T' ) ) {
+                // then process your divide...
+                // remove first character /
+                USB_Msg_Get();
+
+                struct __attribute__((__packed__)){
+                    char v1;
+                    char v2;
+                    float v3;
+                } data;
+                
+                USB_Msg_Read_Into( &data, sizeof(data));
+
+                Fetch_and_Send_big_T(data.v1, data.v2, data.v3);
+                
+
+                // /* MEGN540 -- LAB 2 */ command_processed = true;
+                // WHAT TO DO WITH THIS? ^^^ -Q ************************************************
             }
             break;
         default:
