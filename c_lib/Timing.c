@@ -156,7 +156,7 @@ float Timing_Seconds_Since( const Time_t* p_time_start )
     // *** MEGN540 Lab 2 ***
     // YOUR CODE HERE
     // ---Q Code---
-    float delta_time = _count_ms - time_start_p->millisec;
+    float delta_time = (_count_ms - time_start_p->millisec) / 1000;
     return delta_time;
 }
 

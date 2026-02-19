@@ -68,7 +68,7 @@ void Task_Message_Handling( float _time_since_last )
     // bytes yet, the command persists
     char command = USB_Msg_Peek();
 
-    // /* MEGN540 -- LAB 2 */ bool command_processed = false;
+     /* MEGN540 -- LAB 2 */ bool command_processed = false;
 
     // process command
     switch( command ) {
@@ -96,7 +96,7 @@ void Task_Message_Handling( float _time_since_last )
                 // Call MEGN540_Lab_Task Function
                 Multiply_And_Send( data.v1, data.v2 );
 
-                // /* MEGN540 -- LAB 2 */ command_processed = true;
+                 /* MEGN540 -- LAB 2 */ command_processed = true;
             }
             break;
         case '/':
@@ -115,7 +115,7 @@ void Task_Message_Handling( float _time_since_last )
                 Divide_And_Send(data.v1, data.v2);
                 
 
-                // /* MEGN540 -- LAB 2 */ command_processed = true;
+                 /* MEGN540 -- LAB 2 */ command_processed = true;
             }
             break;
         case '+':
@@ -131,7 +131,7 @@ void Task_Message_Handling( float _time_since_last )
                 USB_Msg_Read_Into(& data, sizeof(data));
                 Add_And_Send(data.v1, data.v2);
 
-                // /* MEGN540 -- LAB 2 */ command_processed = true;
+                 /* MEGN540 -- LAB 2 */ command_processed = true;
             }
             break;
         case '-':
@@ -149,7 +149,7 @@ void Task_Message_Handling( float _time_since_last )
 
 
 
-                // /* MEGN540 -- LAB 2 */ command_processed = true;
+                 /* MEGN540 -- LAB 2 */ command_processed = true;
             }
             break;
         case '~':
@@ -158,7 +158,7 @@ void Task_Message_Handling( float _time_since_last )
                 USB_Msg_Get();
                 Task_Activate(&task_restart, -1);
                 USB_Send_Msg("c",'0',NULL,0);
-                // /* MEGN540 -- LAB 2 */ command_processed = true;
+                 /* MEGN540 -- LAB 2 */ command_processed = true;
             }
             break;
         // LAB 2 CASES: ----------------------------------------------------------------------------
@@ -178,8 +178,8 @@ void Task_Message_Handling( float _time_since_last )
                 Fetch_and_Send_little_t(data.v1, data.v2);
                 
                 
-                // /* MEGN540 -- LAB 2 */ command_processed = true;
-                // WHAT TO DO WITH THIS? ^^^ -Q ************************************************
+                 /* MEGN540 -- LAB 2 */ command_processed = true;
+                
             }
             break;
 
@@ -200,8 +200,8 @@ void Task_Message_Handling( float _time_since_last )
                 Fetch_and_Send_big_T(data.v1, data.v2, data.v3);
                 
 
-                // /* MEGN540 -- LAB 2 */ command_processed = true;
-                // WHAT TO DO WITH THIS? ^^^ -Q ************************************************
+                 /* MEGN540 -- LAB 2 */ command_processed = true;
+                
             }
             break;
         default:
@@ -213,10 +213,10 @@ void Task_Message_Handling( float _time_since_last )
     }
 
     //********* MEGN540 -- LAB 2 ************//
-    // if( command_processed ) {
-    //     // RESET the WATCHDOG TIMER
-    //     Task_Activate( &task_message_handling_watchdog );
-    // }
+    if( command_processed ) {
+        // RESET the WATCHDOG TIMER
+        Task_Activate( &task_message_handling_watchdog );
+    }
 }
 
 /**
