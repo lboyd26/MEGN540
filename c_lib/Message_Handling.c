@@ -44,8 +44,12 @@ should be executed in the main loop both because its active and because its time
  */
 bool MSG_FLAG_Execute( MSG_FLAG_t* p_flag) {
     // OUR CODE HERE:
-
-
+    if(p_flag->is_active && Timing_Seconds_Since(&p_flag->time_last_ran) >= p_flag->run_period)
+    {
+        p_flag->time_last_ran = Timing_Get_Time(); 
+        return true; 
+    }
+    return false; 
 }
 
 /**
@@ -162,6 +166,8 @@ void Task_Message_Handling( float _time_since_last )
             }
             break;
         // LAB 2 CASES: ----------------------------------------------------------------------------
+        
+        // I have no idea if this was the right way to do this -JW
         case 't':
             if( USB_Msg_Length() >= _Message_Length( 't' ) ) {
                 // then process your divide...
@@ -174,8 +180,12 @@ void Task_Message_Handling( float _time_since_last )
                 // THE GIST:
                 // Return time right now plus input char request. SO, could be the 0x00 -> give the time now again...
                 // OR 0x01 -> give the time that the last loop took via having a task track the looping time.
+                struct __attribute__((__packed__)){
+                    char request; 
+                } data; 
                 
                 USB_Msg_Read_Into( &data, sizeof(data));
+                Fetch_and_Send_little_t(data.request == 0x00, data.request == 0x01); 
 
                 //Dont use this function... Fetch_and_Send_little_t(data.v1, data.v2); There already funcs defined in the Lab2-Tasks.h file.
                 
@@ -193,6 +203,10 @@ void Task_Message_Handling( float _time_since_last )
 
                 // Get the number character: 0 - Time Now; 1 - Time of loop iteration
                 //---------->>>
+                struct __attribute__((__packed__)){
+                    char request; 
+                    float interval; 
+                } data;                
                 
                 // THE GIST:
                 // Basically everything little t did plus the time of every X milliseconnds using another task that will activate every pass through the loop
@@ -201,6 +215,7 @@ void Task_Message_Handling( float _time_since_last )
                 // OR 0x01 -> give the time that the last loop took via having a task track the looping time.
                 
                 USB_Msg_Read_Into( &data, sizeof(data));
+                Fetch_and_Send_big_T(data.request == 0x00, data.request == 0x01, data.interval); 
 
                 //Dont use this function... Fetch_and_Send_big_T(data.v1, data.v2); There already funcs defined in the Lab2-Tasks.h file.
                 

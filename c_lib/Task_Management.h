@@ -42,6 +42,9 @@ typedef struct {
     void ( *task_fcn_ptr )( float );
 } Task_t;
 
+// Added a new alias to match MSG_FLAG_Execute function. I have no Idea if the is right, but MSG_FLAG_t was not defined anywhere
+typedef Task_t MSG_FLAG_t; 
+
 /**
  * @brief Function Initialize_Task sets up a task object. Initializes time_last_ran to 0, is_active to false, and run_period to -1.
  *

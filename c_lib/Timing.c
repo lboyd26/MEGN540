@@ -112,7 +112,7 @@ Time_t Timing_Get_Time()
         * current time by unsing the TCNT0 timer (in microseconds)
         * and multiply it by the prescaled tick period, 4 us. 
         */    
-        .microsec = (_count_ms * 1000.0) + (TCNT0 * 4)  
+        .microsec = (_count_ms * 1000) + (TCNT0 * 4)  
     };
 
     return time;
@@ -123,7 +123,7 @@ Time_t Timing_Get_Time()
  * things on second or millisecond resolution.
  * @return
  */
-uint32_t Timing_Get_Milli()
+uint16_t Timing_Get_Milli()
 {
     /* Access the individual 
     * parts of the time struct
@@ -155,7 +155,7 @@ float Timing_Seconds_Since( const Time_t* time_start_p)
     // *** MEGN540 Lab 2 ***
     // YOUR CODE HERE
     // ---Q Code---
-    float delta_time = (_count_ms - p_time_start->millisec) / 1000;
+    float delta_time = (_count_ms - time_start_p->millisec) / 1000.0;
     return delta_time;
 }
 
