@@ -152,9 +152,64 @@ void Task_Message_Handling( float _time_since_last )
                 command_processed = true;
             }
             break;
+        case 't': {
+            //one shot request
+            if(USB_Msg_Length() >= _Message_Length( 't' ) ) {
+                USB_Msg_Get();
+                struct __attribute__( ( __packed__ ) ) {
+                    uint8_t type;
+                } data;
+                USB_Msg_Read_Into( &data, sizeof( data ) );
+                switch( data.type ) {
+                    case 0x00:
+                        Task_Activate( &task_send_time, -1 );
+                        break;
+                    case 0x01:
+                        Task_Activate( &task_time_loop, -1 );
+                        break;
+                    default:
+                        break;
+                }
+                command_processed = true;
+            }
+        }break;
+        case 'T': {
+            //periodic and cancel
+            //c c f
+            //cmd + type + float period(ms)
+            if( USB_Msg_Length() >= _Message_Length( 'T' ) ) {
+                USB_Msg_Get();
+                struct __attribute__( ( __packed__ ) ) {
+                    uint8_t type;
+                    float period_ms;
+                } data;
+                USB_Msg_Read_Into( &data, sizeof( data ) );
+                float period_s = data.period_ms / 1000.0f;
+                switch(data.type) {
+                    case 0x00:
+                        if(data.period_ms <= 0) {
+                            Task_Cancel( &task_send_time );
+                        }else {
+                            Task_Activate( &task_send_time, period_s );
+                        }
+                        break;
+                    case 0x01:
+                        if(data.period_ms <= 0) {
+                            Task_Cancel( &task_time_loop );
+                        }else {
+                            Task_Activate( &task_time_loop, period_s );
+                        }
+                        break;
+                    default:
+                        break;
+                }
+                command_processed = true;
+            }
+        }break;
         default:
             // What to do if you dont recognize the command character
-            USB_Msg_Get();
+            char qm = '?';
+            USB_Send_Msg("cc", command, &qm, sizeof(qm));
             USB_Flush_Input_Buffer();
             break;
     }
@@ -162,7 +217,11 @@ void Task_Message_Handling( float _time_since_last )
     //********* MEGN540 -- LAB 2 ************//
      if( command_processed ) {
          // RESET the WATCHDOG TIMER
-         Task_Activate( &task_message_handling_watchdog );
+         Task_Cancel( &task_message_handling_watchdog );
+    }else {
+        if(!task_message_handling_watchdog.is_active) {
+            Task_Activate( &task_message_handling_watchdog, 0.1 );
+        }
     }
 }
 

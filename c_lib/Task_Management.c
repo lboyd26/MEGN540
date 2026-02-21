@@ -23,6 +23,8 @@ void Task_Activate( Task_t* task, float run_period )
     // to identify the task is active
     // set the run_period as proscribed
     task->is_active = true;
+    task->time_last_ran = Timing_Get_Time();
+    task->run_period = run_period;
 }
 
 /**
@@ -36,6 +38,8 @@ void Task_ReActivate( Task_t* task )
     //****** MEGN540 --  START IN LAB 1, UPDATE IN Lab 2 ******//
     // Here you should change the state of the is_active member and set the time to now (lab 2)
     // to identify the task is active
+    task->is_active = true;
+    task->time_last_ran = Timing_Get_Time();
 
 }
 
@@ -56,7 +60,21 @@ bool Task_Is_Ready( Task_t* task )
     //****** MEGN540 --  START IN LAB 1, UPDATE IN Lab 2 ******//
     // Note a run_period of 0 indicates the task should be run every time if it is active.
     // MEGN540 Update to set the return statement based on is_active and time_last_ran.
-    return task->is_active;
+    if(task->is_active) {
+        if(task->run_period > 0) {
+            if(Timing_Seconds_Since(&task->time_last_ran)) >= task->run_period{
+                return true;
+            }
+        }
+        if(task->run_period < 0) {
+            return true;
+        }
+        if(task->run_period == 0) {
+            return true;
+        }
+    }
+    return false;
+
 }
 
 /**
@@ -68,6 +86,13 @@ bool Task_Is_Ready( Task_t* task )
 void Task_Run( Task_t* task )
 {
     // If the function pointer is not NULL (0), run task.
+    if(task->task_fcn_ptr != 0) {
+        task->task_fnc_ptr(Timing_Seconds_Since(&task->time_last_ran));
+        task->time_last_ran = Timing_Get_Time();
+        if(task->run_period < 0) {
+            task->is_active = false;
+        }
+    }
     // To call a void functor (function pointer):  functor_variable();
     // Update time_last_ran and is_active as appropriate.
     // Note that a negative run_period indicates the task should only be performed once, while
@@ -87,11 +112,9 @@ bool Task_Run_If_Ready( Task_t* task )
     //
     // Run it if it is ready
 
-    if (task->is_active != 0){
-        task->time_last_ran.microsec = 0;
-        task->time_last_ran.millisec = 0;
-        return task;
+    if(Task_Is_Ready(task)) {
+        Task_Run(task);
+        return true;
     }
-
     return false;  // true if it ran, false if it did not run
 }
