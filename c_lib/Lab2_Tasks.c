@@ -73,16 +73,16 @@ void Fetch_and_Send_big_T(char time_now, char time_loop, float everyX) {
 
 // Put your lab-specific task functionality and data_structures (if necessary) here so it is accessable to both
 // message handeling and the Lab main loops.
-void Send_Loop_Time( float _time_since_last ) {
+void Send_Loop_Time( float* _time_since_last ) {
     // _time_since_last already contains how long the 
     // last loop took
     USB_Send_Msg("cf", 't', &_time_since_last, sizeof(_time_since_last)); 
 
 }
-void Send_Time_Now( float _time_since_last ){
+void Send_Time_Now( float* _time_since_last ){
     // Get current time in sec
     float timeNow = Timing_Get_Time_Sec();
 
     // Send current time over USB
-    USB_Send_Msg("cf", "t", &timeNow, sizeof(timeNow)); 
+    USB_Send_Msg("cf", 't', &timeNow, sizeof(timeNow)); 
 }
