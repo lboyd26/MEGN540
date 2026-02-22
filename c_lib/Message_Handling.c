@@ -183,9 +183,13 @@ void Task_Message_Handling( float _time_since_last )
                 struct __attribute__((__packed__)){
                     char request; 
                 } data; 
+
+                // Send current time by default
+                Send_Time_Now(0.0);
                 
                 USB_Msg_Read_Into( &data, sizeof(data));
-                Fetch_and_Send_little_t(data.request == 0x00, data.request == 0x01); 
+
+                //Fetch_and_Send_little_t(data.request == 0x00, data.request == 0x01); 
 
                 //Dont use this function... Fetch_and_Send_little_t(data.v1, data.v2); There already funcs defined in the Lab2-Tasks.h file.
                 
@@ -213,9 +217,22 @@ void Task_Message_Handling( float _time_since_last )
                 //      Maybe turn the repetition task on and off as necessary.
                 // Return time right now plus input char request. SO, could be the 0x00 -> give the time now again...
                 // OR 0x01 -> give the time that the last loop took via having a task track the looping time.
+
+                // Send current time by default
+                Send_Time_Now(0.0);
                 
                 USB_Msg_Read_Into( &data, sizeof(data));
-                Fetch_and_Send_big_T(data.request == 0x00, data.request == 0x01, data.interval); 
+                // If just send time now.
+                if (data.request == 0x00) {
+                    Send_Time_Now(0.0);
+                }
+                // Else if loop given
+                else if (data.request == 0x01) {
+                    Send_Loop_Time(_time_since_last);
+                    // DUE to the way task func pointer is called in task_management.c, _time_since_last contains the time elapsed since func ran last
+                }
+
+                //Fetch_and_Send_big_T(data.request == 0x00, data.request == 0x01, data.interval); 
 
                 //Dont use this function... Fetch_and_Send_big_T(data.v1, data.v2); There already funcs defined in the Lab2-Tasks.h file.
                 

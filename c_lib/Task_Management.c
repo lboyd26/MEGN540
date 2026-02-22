@@ -95,7 +95,7 @@ void Task_Run( Task_t* task )
     // Note that a negative run_period indicates the task should only be performed once, while
     // a run_period of 0 indicates the task should be run every time if it is active.
     if(task->task_fcn_ptr != 0){
-        task->task_fcn_ptr(0.0);
+        task->task_fcn_ptr(Timing_Get_Milli() - task->time_last_ran.millisec); // Time elapsed since last ran in ms is passedd to function being ran
         task->time_last_ran.millisec = Timing_Get_Milli();
         task->time_last_ran.microsec = Timing_Get_Micro();
     }
