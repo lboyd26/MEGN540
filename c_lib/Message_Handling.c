@@ -207,11 +207,13 @@ void Task_Message_Handling( float _time_since_last )
             }
         }break;
         default:
+        {
             // What to do if you dont recognize the command character
             char qm = '?';
             USB_Send_Msg("cc", command, &qm, sizeof(qm));
             USB_Flush_Input_Buffer();
             break;
+        }
     }
 
     //********* MEGN540 -- LAB 2 ************//

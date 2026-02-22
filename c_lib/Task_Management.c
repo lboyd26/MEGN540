@@ -62,7 +62,7 @@ bool Task_Is_Ready( Task_t* task )
     // MEGN540 Update to set the return statement based on is_active and time_last_ran.
     if(task->is_active) {
         if(task->run_period > 0) {
-            if(Timing_Seconds_Since(&task->time_last_ran)) >= task->run_period{
+            if(Timing_Seconds_Since(&task->time_last_ran) >= task->run_period){
                 return true;
             }
         }
@@ -87,7 +87,7 @@ void Task_Run( Task_t* task )
 {
     // If the function pointer is not NULL (0), run task.
     if(task->task_fcn_ptr != 0) {
-        task->task_fnc_ptr(Timing_Seconds_Since(&task->time_last_ran));
+        task->task_fcn_ptr(Timing_Seconds_Since(&task->time_last_ran));
         task->time_last_ran = Timing_Get_Time();
         if(task->run_period < 0) {
             task->is_active = false;
