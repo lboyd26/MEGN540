@@ -67,6 +67,9 @@ void Initialize_Timing()
     // This is counting ticks. One tick every 4 micro-secs.
     TCNT0 = 0; 
 
+    // Set the comapre register? 
+    OCR0A = 249; 
+
     /*
     Initialize Output Compare A (ISR comment specifies Compare A)
     TIMSK0 contains an Output Compare Match A bit. Shift said bit 

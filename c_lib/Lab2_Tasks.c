@@ -10,7 +10,7 @@ void init()
 {
     Initialize_Task(&task_time_loop, Send_Loop_Time); 
     Initialize_Task(&task_send_time, Send_Time_Now); 
-    Initialize_Task(&task_message_handling_watchdog, task_message_handling_watchdog); 
+    Initialize_Task(&task_message_handling_watchdog, Task_Message_Handling_Watchdog); 
 }
 
 // // /**

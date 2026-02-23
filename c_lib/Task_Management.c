@@ -65,10 +65,10 @@ bool Task_Is_Ready( Task_t* task )
     if (task->is_active) {
         // IF its a single run (-1) or run everytime (0) task
         if (task->run_period <= 0) {
-            return true
+            return true;
         }
           // If current time - time_last_run > run period, run it
-        if (Timing_Get_Milli() - (task->time_last_ran.millisec) >= task.run_period) {
+        if (Timing_Get_Milli() - (task->time_last_ran.millisec) >= task->run_period) {
             return true;
         }
         
