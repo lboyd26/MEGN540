@@ -1,4 +1,5 @@
 #include "Lab2_Tasks.h"
+#include "Message_Handling.h"
 
 // Put your lab-specific tasks here
 // e.g. Task_t task_restart;  ///<-- Lab 1: This flag indicates that the device received a restart command from the hoast. Default inactive.
