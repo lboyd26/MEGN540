@@ -189,6 +189,15 @@ void Task_Message_Handling( float _time_since_last )
                 
                 USB_Msg_Read_Into( &data, sizeof(data));
 
+                if (data.request == 0x00) {
+                    Send_Time_Now(0.0);
+                }
+                // Else if loop given
+                else if (data.request == 0x01) {
+                    Send_Loop_Time(_time_since_last);
+                    // DUE to the way task func pointer is called in task_management.c, _time_since_last contains the time elapsed since msgHandling ran last
+                }
+
                 //Fetch_and_Send_little_t(data.request == 0x00, data.request == 0x01); 
 
                 //Dont use this function... Fetch_and_Send_little_t(data.v1, data.v2); There already funcs defined in the Lab2-Tasks.h file.
@@ -218,6 +227,9 @@ void Task_Message_Handling( float _time_since_last )
                 // Return time right now plus input char request. SO, could be the 0x00 -> give the time now again...
                 // OR 0x01 -> give the time that the last loop took via having a task track the looping time.
 
+                // For the X ms thing (big T functionality) Im thinking we make a task that we activate to control this. Activate it with a "interval" run_period. This task will be
+                // in the main loop and will only "task_run_if_ready" so it only runs if the run_period = interval, is reached.
+
                 // Send current time by default
                 Send_Time_Now(0.0);
                 
@@ -229,8 +241,20 @@ void Task_Message_Handling( float _time_since_last )
                 // Else if loop given
                 else if (data.request == 0x01) {
                     Send_Loop_Time(_time_since_last);
-                    // DUE to the way task func pointer is called in task_management.c, _time_since_last contains the time elapsed since func ran last
+                    // DUE to the way task func pointer is called in task_management.c, _time_since_last contains the time elapsed since msgHandling ran last
                 }
+
+                // Big T funcitnality:
+                // IF non-zero interval >> Run the task so it repeats every interval milisecs
+                if (data.interval > 0) {
+                    Task_Activate(&task_send_time, data.interval);
+                }
+                // ELSE data.interval <= 0 so request is cancelled.
+                else {
+                    Task_Cancel(&task_send_time);
+                }
+
+                
 
                 //Fetch_and_Send_big_T(data.request == 0x00, data.request == 0x01, data.interval); 
 

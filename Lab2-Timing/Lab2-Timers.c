@@ -86,6 +86,7 @@ int main( void )
 
 
         Task_Run_If_Ready( &task_message_handling );
+        Task_Run_If_Ready(&task_send_time);
         Task_Run_If_Ready( &task_restart );
 
         // Use this watchdog as the 100 ms no answer-buffer flush thing from the lab PDF

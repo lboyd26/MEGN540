@@ -77,6 +77,7 @@ void Send_Loop_Time( float _time_since_last ) {
 
     // _time_since_last already contains how long the 
     // last loop took
+    _time_since_last /= 1000; // Convert to seconds
 
     USB_Send_Msg("cf", 't', &_time_since_last, sizeof(_time_since_last)); 
 

@@ -52,6 +52,9 @@ Task_t task_message_handling_watchdog;  ///<-- LAB 2: Watchdog Timer for Flusing
 void Send_Loop_Time( float _time_since_last );
 void Send_Time_Now( float _time_since_last );
 
+//Custom Addition by us...
+void init(); // Task initializer.
+
 // /**
 //  * Return the time it requested followed by the time to complete the action specified by the second imput char. 
 //  * 0x00 -> Time Now 
