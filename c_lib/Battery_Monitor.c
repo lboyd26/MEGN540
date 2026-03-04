@@ -9,9 +9,13 @@ void Initialize_Battery_Monitor()
 {
 
     // *** MEGN540 LAB3 YOUR CODE HERE ***
-    ADCSRA |= (1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0); // set to 128 kHz
+
+    ADCSRA |= (1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0); // set to 125 kHz
 
     ADMUX |= (1 << REFS1) | (1 << REFS0); // Internal 2.56V Voltage Reference with external capacitor on AREF pin
+
+    ADCSRA |= (1 << ADEN);
+
 }
 
 /**
