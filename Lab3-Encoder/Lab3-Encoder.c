@@ -29,6 +29,15 @@
 */
 
 // put your includes here for all modules you need to use
+#include "Lab1_Tasks.h"
+#include "Lab2_Tasks.h"
+#include "Lab3_Tasks.h"
+
+
+#include "Message_Handling.h"
+#include "SerialIO.h"
+#include "Task_Management.h"
+#include "Timing.h"
 
 // put your task includes and/or function declarations here for future populaion
 
@@ -38,6 +47,33 @@
 
 // put your initialization function here
 
+void Initialize_Modules( float _time_not_used_ )
+{
+    // Initialize (reinitialize) all global variables
+
+    // reset USB input buffers
+    USB_Flush_Input_Buffer();
+
+    // Initialize all modules except USB (it can only be called once without messing things up)
+    Initialize_Timing();
+
+    // Setup task handling
+    Initialize_Task( &task_restart, Initialize_Modules /*function pointer to call*/ );
+
+    // Setup message handling to get processed at some desired rate.
+    Initialize_Task( &task_message_handling, Task_Message_Handling );
+
+    // Initialize_Task( &task_message_handling_watchdog, /*watchdog timout period*/,  Task_Message_Handling_Watchdog );
+    Initialize_Task(&task_message_handling_watchdog, Task_Message_Handling_Watchdog);
+    Initialize_Task(&task_time_loop, Send_Loop_Time);
+    Initialize_Task(&task_send_time, Send_Time_Now);
+    Task_Activate(&task_message_handling, 0);
+
+    Initialize_Encoders();
+    Initialize_Battery_Monitor();
+}
+
+
 /** Main program entry point. This routine configures the hardware required by the application, then
  *  enters a loop to run the application tasks in sequence.
  */
@@ -45,12 +81,20 @@ int main( void )
 {
 
     // call initialization stuff
-
+    Initialize_USB();
+    Initialize_Modules( 0.0 );
     for( ;; ) {
         // main loop logic
+        Task_USB_Upkeep();
+
+        Task_Run_If_Ready( &task_message_handling );
+        Task_Run_If_Ready( &task_restart );
+
+        Task_Run_If_Ready( &task_message_handling_watchdog );
+        Task_Run_If_Ready( &task_time_loop );
+        Task_Run_If_Ready( &task_send_time );
     }
 
-    return 0;
 }
 
 // put your task function definitions here

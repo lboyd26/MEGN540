@@ -143,7 +143,7 @@ float Encoder_Rad_Left()
 {
     // *** MEGN540 Lab3 ***
     // YOUR CODE HERE.  How many counts per rotation???
-    int8_t counts_pre_rev = 12;
+    int8_t counts_per_rev = 12;
     float rad = ((float)Encoder_Counts_Left() / counts_per_rev) * (2.0f * M_PI);
     return rad;
 }
@@ -156,7 +156,7 @@ float Encoder_Rad_Right()
 {
     // *** MEGN540 Lab3 ***
     // YOUR CODE HERE.  How many counts per rotation???
-    int8_t counts_pre_rev = 12;
+    int8_t counts_per_rev = 12;
     float rad = ((float)Encoder_Counts_Right() / counts_per_rev) * (2.0f * M_PI);
     return rad;
 }
