@@ -12,7 +12,9 @@ void Initialize_Battery_Monitor()
 
     ADCSRA |= (1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0); // set to 125 kHz
 
-    ADMUX |= (1 << REFS1) | (1 << REFS0); // Internal 2.56V Voltage Reference with external capacitor on AREF pin
+    ADMUX |= (1 << REFS1) | (1 << REFS0) | (1 << MUX0) | (1 << MUX1) | (1 << MUX3); // Internal 2.56V Voltage Reference with external capacitor on AREF pin
+
+    ADCSRB |= (1 << MUX5);
 
     ADCSRA |= (1 << ADEN);
 
@@ -31,6 +33,10 @@ float Battery_Voltage()
         } split;
         uint16_t value;
     } data = { .value = 0 };
+
+    ADCSRA |= (1 << ADSC);          
+    while(bit_is_set(ADCSRA, ADSC)); 
+    data.value = ADC;
 
     // *** MEGN540 LAB3 YOUR CODE HERE ***
 

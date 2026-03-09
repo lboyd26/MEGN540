@@ -208,6 +208,60 @@ void Task_Message_Handling( float _time_since_last )
                 command_processed = true;
             }
         }break;
+        case 'e': {
+            //one time
+            if( USB_Msg_Length() >= _Message_Length( 'e' ) ) {
+                USB_Msg_Get();
+                Task_Activate(&task_send_encoder_now, -1);          
+                command_processed = true;
+            }
+        }break;
+        case 'E': {
+            //periodic and cancel
+            //c c f
+            //cmd + type + float period(ms)
+            if( USB_Msg_Length() >= _Message_Length( 'E' ) ) {
+                USB_Msg_Get();
+                struct __attribute__( ( __packed__ ) ) {
+                    float period_ms;
+                } data;
+                USB_Msg_Read_Into( &data, sizeof( data ) );
+                float period_s = data.period_ms / 1000.0f;
+                if( data.period_ms <= 0){
+                    Task_Cancel(&task_send_encoder_loop);
+                }else{
+                    Task_Activate(&task_send_encoder_loop, period_s);
+                }
+                command_processed = true;
+            }
+        }break;
+        case 'b': {
+            //one time
+            if( USB_Msg_Length() >= _Message_Length( 'b' ) ) {
+                USB_Msg_Get();
+                Task_Activate(&task_send_battery_now, -1);
+                command_processed = true;
+            }
+        }break;
+        case 'B': {
+            //periodic and cancel
+            //c c f
+            //cmd + type + float period(ms)
+            if( USB_Msg_Length() >= _Message_Length( 'B' ) ) {
+                USB_Msg_Get();
+                struct __attribute__( ( __packed__ ) ) {
+                    float period_ms;
+                } data;
+                USB_Msg_Read_Into( &data, sizeof( data ) );
+                float period_s = data.period_ms / 1000.0f;
+                if( data.period_ms <= 0){
+                    Task_Cancel(&task_send_battery_loop);
+                }else{
+                    Task_Activate(&task_send_battery_loop, period_s);
+                }
+                command_processed = true;
+            }
+        }break;
         default:
         {
             // What to do if you dont recognize the command character
