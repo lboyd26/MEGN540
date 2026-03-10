@@ -261,7 +261,7 @@ void Task_Message_Handling( float _time_since_last )
                 }
                 command_processed = true;
             }
-        }break;
+        }break; 
         default:
         {
             // What to do if you dont recognize the command character

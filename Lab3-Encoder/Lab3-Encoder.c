@@ -119,7 +119,7 @@ int main( void )
         Task_Run_If_Ready( &task_send_battery_loop );
         Task_Run_If_Ready( &task_send_encoder_now );
         Task_Run_If_Ready( &task_send_encoder_loop );
-        Task_Run_If_Ready( &task_battery_status );
+        //Task_Run_If_Ready( &task_battery_status );
         Task_Run_If_Ready( &task_battery_filter );
     }
 

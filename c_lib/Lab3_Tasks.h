@@ -37,9 +37,12 @@
 
 // Include your lab-specific headers here
 // e.g. #include "SerialIO.h"  // necessary for sending arithmatic results back to user
+#include "SerialIO.h"
 #include "Battery_Monitor.h"
 #include "Encoder.h"
 #include "Filter.h"
+#include "Task_Management.h"
+
 
 // Put your lab-specific tasks here
 // e.g. Task_t task_restart;  ///<-- Lab 1: This flag indicates that the device received a restart command from the hoast. Default inactive.

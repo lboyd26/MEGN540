@@ -7,17 +7,15 @@ static const float BITS_TO_BATTERY_VOLTS = 2.56 * 2.0 / 1023.0;
  */
 void Initialize_Battery_Monitor()
 {
-
     // *** MEGN540 LAB3 YOUR CODE HERE ***
 
     ADCSRA |= (1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0); // set to 125 kHz
 
     ADMUX |= (1 << REFS1) | (1 << REFS0) | (1 << MUX0) | (1 << MUX1) | (1 << MUX3); // Internal 2.56V Voltage Reference with external capacitor on AREF pin
-
+    //missing DIDR0, check MUX, REFS1
     ADCSRB |= (1 << MUX5);
 
     ADCSRA |= (1 << ADEN);
-
 }
 
 /**
@@ -39,6 +37,5 @@ float Battery_Voltage()
     data.value = ADC;
 
     // *** MEGN540 LAB3 YOUR CODE HERE ***
-
     return data.value * BITS_TO_BATTERY_VOLTS;
 }

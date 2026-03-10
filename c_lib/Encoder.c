@@ -62,7 +62,24 @@ void Initialize_Encoders()
     // You'll use the INT6_vect ISR flag.
 
     // Initialize static file variables. These probably need to be updated.
-    cli();
+    sei();
+
+    clear EIMSK INT 6
+    clear EICRB ICS61
+    set EICRB ISC60
+    
+    clear EIFR
+    EIMSK
+
+    enable interrupts
+
+    set the pin data direction registers, 
+
+
+
+    PCIFR TODO
+    PORTE, PORTF, PORTB, 
+
 
     DDRB &= ~(1<<4); // Left XOR
 
@@ -75,8 +92,14 @@ void Initialize_Encoders()
     PCICR |= (1 << PCIE0);
     PCMSK0 |= (1 << PCINT4);
 
+    
+
     EICRB |= (1 << ISC60);
+    EICRB &= ~(1 << ISC61);
     EIMSK |= (1 << INT6);
+
+    TODO: EIFR
+
 
     _last_right_B = Right_B();
     _last_right_A = _last_right_B ^ Right_XOR();
@@ -88,7 +111,6 @@ void Initialize_Encoders()
     _left_counts  = 0;
     _right_counts = 0;
 
-    sei();
 }
 
 /**
@@ -168,7 +190,7 @@ float Encoder_Rad_Right()
  */
 ISR(PCINT0_vect)
 {
-    if(Left_XOR() != _last_left_XOR) {
+    if(Left_XOR() == _last_left_XOR) {
         bool A = Left_A();
         bool B = Left_B();
 
