@@ -118,10 +118,10 @@ int main( void )
         Task_Run_If_Ready( &task_send_encoder_now );
         Task_Run_If_Ready( &task_send_encoder_loop );
 
-        //Task_USB_Upkeep();
-        //Task_Run_If_Ready( &task_send_battery_now );
-        //Task_Run_If_Ready( &task_send_battery_loop );
-        //Task_Run_If_Ready( &task_battery_status );
+        Task_USB_Upkeep();
+        Task_Run_If_Ready( &task_send_battery_now );
+        Task_Run_If_Ready( &task_send_battery_loop );
+        Task_Run_If_Ready( &task_battery_status );
 
         Task_USB_Upkeep();
         Task_Run_If_Ready( &task_time_loop );

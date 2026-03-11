@@ -127,13 +127,13 @@ static void _USB_Write_Data()
 
 void Task_USB_Upkeep()
 {
-    cli();
     USB_USBTask();  // lufa internal upkeep task
 
     // *** MEGN540  ***
     // Each iteration you should send what you have in the buffer
     // and get what is there to get from the buffer.
     // this is done by leveraging your _USB_Read_Data and _USB_Write_Data functions
+    cli();
     _USB_Read_Data();
     _USB_Write_Data();
     sei();
