@@ -13,11 +13,11 @@ void Initialize_Battery_Monitor()
 
     ADCSRA |= (1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0); // set to 125 kHz
     //ADCSRA |= (1 << ADPS2) | (1 << ADPS1);
-    ADMUX &= ~(1<<MUX0);
-    ADMUX &= ~(1<<MUX3);
-    ADMUX |=  (1 << REFS0) | (1 << MUX1) | (1 << MUX2); // Internal 2.56V Voltage Reference with external capacitor on AREF pin
-    ADMUX &= ~(1<<REFS1);
-    ADMUX &= ~(1<<ADLAR);
+    //ADMUX &= ~(1<<MUX0);
+    //ADMUX &= ~(1<<MUX3);
+    ADMUX =  (1 << REFS0) | (1 << MUX1) | (1 << MUX2); // Internal 2.56V Voltage Reference with external capacitor on AREF pin
+    //ADMUX &= ~(1<<REFS1);
+    //ADMUX &= ~(1<<ADLAR);
     
     //missing DIDR0, check MUX, REFS1
     ADCSRB &= ~(1 << MUX5);
@@ -26,6 +26,11 @@ void Initialize_Battery_Monitor()
     DIDR0 &= ~(1<<ADC6D);
 
     ADCSRA |= (1 << ADEN);
+
+    ADCSRA |= (1 << ADSC);          
+    while(bit_is_set(ADCSRA, ADSC)) {}
+    (void)ADCL;
+    (void)ADCL;
 }
 
 /**

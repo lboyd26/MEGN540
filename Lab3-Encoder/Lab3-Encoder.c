@@ -112,7 +112,7 @@ int main( void )
         Task_USB_Upkeep();
 
         Task_Run_If_Ready( &task_message_handling );
-        //Task_Run_If_Ready( &task_battery_filter );
+        Task_Run_If_Ready( &task_battery_filter );
 
         Task_USB_Upkeep();
         Task_Run_If_Ready( &task_send_encoder_now );
@@ -122,7 +122,6 @@ int main( void )
         Task_Run_If_Ready( &task_send_battery_now );
         Task_Run_If_Ready( &task_send_battery_loop );
         Task_Run_If_Ready( &task_battery_status );
-        Task_Run_If_Ready( &task_battery_filter );
 
         Task_USB_Upkeep();
         Task_Run_If_Ready( &task_time_loop );
