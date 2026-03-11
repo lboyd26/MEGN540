@@ -52,12 +52,15 @@
 void Initialize_Modules( float _time_not_used_ )
 {
     // Initialize (reinitialize) all global variables
+    
     float pi = 3.14159265358979323846; //doubt need more accuracy...
     float T = 0.002; //period or measure every x seconds
     float fc = 10; //cutoff frequency
     float a = 2.0f * pi * fc * T;
     float b_coeffs[] = { a / (1.0f + a), 0.0f };
     float a_coeffs[] = { 1.0f, -1.0f / (1.0f + a) };
+    
+    //float T = 0.002; //period or measure every x seconds
 
     // reset USB input buffers
     USB_Flush_Input_Buffer();
@@ -68,7 +71,7 @@ void Initialize_Modules( float _time_not_used_ )
     Initialize_Encoders();
     Initialize_Battery_Monitor();
 
-    // Setup task handling
+    // Setup task handling 
     Initialize_Task( &task_restart, Initialize_Modules /*function pointer to call*/ );
 
     // Setup message handling to get processed at some desired rate.
@@ -88,9 +91,9 @@ void Initialize_Modules( float _time_not_used_ )
     Initialize_Task(&task_battery_status, Check_Battery_Voltage);
     Task_Activate(&task_battery_status, 1.0f); //see if needs charging every 1 second forever
 
+    Initialize_Task(&task_battery_filter, Battery_Filter_Update);
     Filter_Init(&battery_filter, b_coeffs, a_coeffs, 1);
     Filter_SetTo(&battery_filter, Battery_Voltage());
-    Initialize_Task(&task_battery_filter, Battery_Filter_Update);
     Task_Activate(&task_battery_filter, T);
 }
 
@@ -109,18 +112,24 @@ int main( void )
         Task_USB_Upkeep();
 
         Task_Run_If_Ready( &task_message_handling );
-        Task_Run_If_Ready( &task_restart );
+        //Task_Run_If_Ready( &task_battery_filter );
 
-        Task_Run_If_Ready( &task_message_handling_watchdog );
+        Task_USB_Upkeep();
+        Task_Run_If_Ready( &task_send_encoder_now );
+        Task_Run_If_Ready( &task_send_encoder_loop );
+
+        //Task_USB_Upkeep();
+        //Task_Run_If_Ready( &task_send_battery_now );
+        //Task_Run_If_Ready( &task_send_battery_loop );
+        //Task_Run_If_Ready( &task_battery_status );
+
+        Task_USB_Upkeep();
         Task_Run_If_Ready( &task_time_loop );
         Task_Run_If_Ready( &task_send_time );
 
-        Task_Run_If_Ready( &task_send_battery_now );
-        Task_Run_If_Ready( &task_send_battery_loop );
-        Task_Run_If_Ready( &task_send_encoder_now );
-        Task_Run_If_Ready( &task_send_encoder_loop );
-        //Task_Run_If_Ready( &task_battery_status );
-        Task_Run_If_Ready( &task_battery_filter );
+        Task_Run_If_Ready( &task_message_handling_watchdog );
+        Task_Run_If_Ready( &task_restart );
+
     }
 
 }

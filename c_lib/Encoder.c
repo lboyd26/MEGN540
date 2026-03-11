@@ -191,7 +191,7 @@ float Encoder_Rad_Right()
  */
 ISR(PCINT0_vect)
 {
-    if(Left_XOR() == _last_left_XOR) {
+    if(Left_XOR() != _last_left_XOR) {
         bool A = Left_A();
         bool B = Left_B();
 
@@ -200,6 +200,7 @@ ISR(PCINT0_vect)
 
         _last_left_B = B;
         _last_left_A = B ^ Left_XOR();
+        _last_left_XOR = Left_XOR();
     }
 }
 

@@ -71,7 +71,7 @@ int main( void )
 
         // Below here you'll process state-machine flags.
         Task_Run_If_Ready( &task_restart );
-
+        Task_USB_Upkeep();
         // uint8_t operation = USB_Msg_Get();
         // float left = USB_Msg_Get();
         // float right = USB_Msg_Get();

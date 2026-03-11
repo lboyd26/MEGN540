@@ -127,6 +127,7 @@ static void _USB_Write_Data()
 
 void Task_USB_Upkeep()
 {
+    cli();
     USB_USBTask();  // lufa internal upkeep task
 
     // *** MEGN540  ***
@@ -135,6 +136,7 @@ void Task_USB_Upkeep()
     // this is done by leveraging your _USB_Read_Data and _USB_Write_Data functions
     _USB_Read_Data();
     _USB_Write_Data();
+    sei();
 }
 
 /** Function to manage CDC data transmission and reception to and from the host for the second CDC interface, which echoes back
@@ -170,8 +172,9 @@ void USB_Send_Byte( uint8_t byte )
     // YOUR CODE HERE
     // This should only interface with the ring buffers and use your ring buffer functions.
 
-	rb_push_back_B( &_usb_send_buffer, byte );
-
+	if (rb_length_B(&_usb_send_buffer) < RB_LENGTH_B - 2){
+        rb_push_back_B( &_usb_send_buffer, byte );
+    }
 }
 
 /**
@@ -268,6 +271,11 @@ void USB_Send_Msg( char* format, char cmd, void* p_data, uint8_t data_len ) {
     format_length++;
 
     uint8_t total_length = format_length + data_len + 1;
+
+    uint8_t space_available = (RB_LENGTH_B - 1) - rb_length_B(&_usb_send_buffer);
+    if (space_available < total_length + 1){
+        return;
+    }
 
     USB_Send_Byte( total_length );
     USB_Send_Str( format );
