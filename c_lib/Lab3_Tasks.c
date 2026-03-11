@@ -12,8 +12,9 @@ void Send_Loop_Battery( float _time_since_last )
 }
 void Send_Battery_Now( float _time_since_last )
 {
-  float voltage = Filter_Last_Output( &battery_filter );
-  USB_Send_Msg("cf",'b', &voltage, sizeof(voltage));
+  //float voltage = Filter_Last_Output( &battery_filter );
+  float volt = Battery_Voltage();
+  USB_Send_Msg("cf",'b', &volt, sizeof(volt));
    // USB_Send_Msg("c",'b', &_battery_filtered, sizeof(_battery_filtered));
 }
 
