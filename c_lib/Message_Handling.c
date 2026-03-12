@@ -265,10 +265,12 @@ void Task_Message_Handling( float _time_since_last )
         default:
         {
             // What to do if you dont recognize the command character
-            char qm = '?';
-            USB_Send_Msg("cc", command, &qm, sizeof(qm));
-            USB_Flush_Input_Buffer();
-            break;
+            USB_Msg_Get();
+             if( command != '\0' && command != '\n' && command != '\r' ) {
+                 USB_Send_Msg( "cc", command, "?", 1 );
+             }
+             USB_Flush_Input_Buffer();
+             break;
         }
     }
 
