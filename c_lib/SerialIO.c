@@ -209,12 +209,13 @@ void USB_Send_Str( char* p_str )
 
 	uint8_t i = 0;
 
-	while (p_str[i] != 0){
+	while (p_str[i] != '\0'){
 		USB_Send_Byte( (uint8_t) p_str[i] );
 		i++;
 	}
 
-	USB_Send_Byte( 0 );
+	//USB_Send_Byte( 0 );
+	rb_push_back_B( &_usb_send_buffer, '\0' );
 
 
     /*
