@@ -60,7 +60,6 @@ void Send_Encoder_Now( float _time_since_last );
 void Send_Loop_Encoder( float _time_since_last );
 void Send_Loop_Battery( float _time_since_last );
 void Send_Battery_Now( float _time_since_last );
-//void Check_Battery_Voltage( float _time_since_last );
 void Battery_Filter_Update( float _time_since_last );
 
 

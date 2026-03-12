@@ -66,14 +66,6 @@ void Initialize_Modules( float _time_not_used_ )
     Initialize_Encoders();
     Initialize_Battery_Monitor();
 
-    //float num[2] = { 0.11819f, 0.0f };   // B0, B1
-    //float den[2] = { 1.0f, -0.88181f };  // A0, A1
-    //Filter_Init( &battery_filter, num, den, 1 );
-
-    // Pre-load filter
-    //Filter_SetTo( &battery_filter, Battery_Voltage() );
-    //battery_filter_initialized = true;
-
 
     // Setup task handling 
     Initialize_Task( &task_restart, Initialize_Modules /*function pointer to call*/ );
@@ -93,8 +85,7 @@ void Initialize_Modules( float _time_not_used_ )
     Initialize_Task(&task_send_encoder_loop, Send_Loop_Encoder);
     Initialize_Task(&task_send_battery_now, Send_Battery_Now);
     Initialize_Task(&task_send_battery_loop, Send_Loop_Battery);
-    //Initialize_Task(&task_battery_status, Check_Battery_Voltage);
-    //Task_Activate(&task_battery_status, 1.0f); //see if needs charging every 1 second forever
+  
 
     Initialize_Task(&task_battery_filter, Battery_Filter_Update);
     Task_Activate(&task_battery_filter, T);

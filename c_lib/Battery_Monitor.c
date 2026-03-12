@@ -12,20 +12,15 @@ static const float BITS_TO_BATTERY_VOLTS = 2.0f * 5.0f / 1023.0f;
  */
 void Initialize_Battery_Monitor()
 {
-    // Set PF6 (ADC6) as input
     DDRF  &= ~( 1 << DDF6 );
     PORTF &= ~( 1 << PORTF6 );
 
-    // Disable digital input buffer on PF6/ADC6
     DIDR0 |= ( 1 << ADC6D );
 
     ADMUX = ( 1 << REFS0 ) | ( 6 & 0x0F );
     ADCSRB &= ~( 1 << MUX5 );
 
-    // ADCSRA: enable ADC (ADEN=1), prescaler 128 (ADPS2:0 = 111)
     ADCSRA = ( 1 << ADEN ) | ( 1 << ADPS2 ) | ( 1 << ADPS1 ) | ( 1 << ADPS0 );
-
-    ADMUX &= ~(1<<ADLAR);
 
     ADCSRA |= ( 1 << ADSC );
     while( ADCSRA & ( 1 << ADSC ) );

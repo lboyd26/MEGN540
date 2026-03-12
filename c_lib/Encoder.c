@@ -66,12 +66,7 @@ void Initialize_Encoders()
     EIMSK &= ~(1 << INT6); //clear EIMSK INT 6
     EICRB &= ~(1 << ISC61); // clear EICRB ICS61
     EICRB |= (1 << ISC60); // set EICRB ISC60
-    
-    //EIMSK
 
-    //enable interrupts
-
-    //TODO set the pin data direction registers,
    
 
     DDRB &= ~(1<<4); // Left XOR
@@ -82,7 +77,6 @@ void Initialize_Encoders()
     DDRF &= ~(1<<0); // Right Channel B
 
 
-    // TODO PORTE, PORTF, PORTB,
     PORTE |= (1 << PE2) | (1 << PE6); 
     PORTB |= (1 << PB4);
     PORTF |= (1 << PF0);
@@ -92,13 +86,10 @@ void Initialize_Encoders()
     PCICR |= (1 << PCIE0);
     PCMSK0 |= (1 << PCINT4);
 
-
-    //EICRB |= (1 << ISC60);
-    //EICRB &= ~(1 << ISC61);
     EIFR = 0; // clear EIFR
     EIMSK |= (1 << INT6);
 
-    //TODO: EIFR
+
 
 
     _last_right_B = Right_B();
