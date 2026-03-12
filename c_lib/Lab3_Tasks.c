@@ -67,3 +67,19 @@ void Battery_Filter_Update( float _time_since_last )
 
     //_battery_filtered = (BATTERY_B * data) + (BATTERY_A * _battery_filtered);
 }
+
+void Filter_Battery_Voltage( float _time_since_last )
+{
+    if( !battery_filter_initialized ) {
+        // 1st-order IIR LPF coefficients: fc=10Hz, fs=500Hz
+        float num[2] = { 0.11819f, 0.0f };   // B0, B1
+        float den[2] = { 1.0f, -0.88181f };  // A0, A1
+        Filter_Init( &battery_filter, num, den, 1 );
+
+        // Pre-load filter
+        Filter_SetTo( &battery_filter, Battery_Voltage() );
+        battery_filter_initialized = true;
+    }
+
+    Filter_Value( &battery_filter, Battery_Voltage() );
+}
