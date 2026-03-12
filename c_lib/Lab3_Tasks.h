@@ -53,7 +53,6 @@ Task_t task_send_battery_loop;
 Task_t task_battery_status;
 Task_t task_battery_filter;
 
-
 // Put your lab-specific task functionality and data_structures (if necessary) here so it is accessable to both
 // message handeling and the Lab main loops.
 // e.g. void Send_Time_Now( float _time_since_last );

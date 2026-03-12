@@ -3,7 +3,6 @@
 //#define BATTERY_B (0.11162f)
 //#define BATTERY_A (0.88838f)
 //static float _battery_filtered = 0.0f;
-
 void Send_Loop_Battery( float _time_since_last )
 {
     float voltage = Filter_Last_Output( &battery_filter );
@@ -68,7 +67,8 @@ void Battery_Filter_Update( float _time_since_last )
     //_battery_filtered = (BATTERY_B * data) + (BATTERY_A * _battery_filtered);
 }
 
-void Filter_Battery_Voltage( float _time_since_last )
+/*
+void Battery_Filter_Update( float _time_since_last )
 {
     if( !battery_filter_initialized ) {
         // 1st-order IIR LPF coefficients: fc=10Hz, fs=500Hz
@@ -83,3 +83,4 @@ void Filter_Battery_Voltage( float _time_since_last )
 
     Filter_Value( &battery_filter, Battery_Voltage() );
 }
+*/

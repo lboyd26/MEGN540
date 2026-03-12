@@ -71,6 +71,16 @@ void Initialize_Modules( float _time_not_used_ )
     Initialize_Encoders();
     Initialize_Battery_Monitor();
 
+    //float num[2] = { 0.11819f, 0.0f };   // B0, B1
+    //float den[2] = { 1.0f, -0.88181f };  // A0, A1
+    //Filter_Init( &battery_filter, num, den, 1 );
+
+    // Pre-load filter
+    //Filter_SetTo( &battery_filter, Battery_Voltage() );
+    //battery_filter_initialized = true;
+
+
+
     Filter_Init(&battery_filter, b_coeffs, a_coeffs, 1);
     Filter_SetTo(&battery_filter, Battery_Voltage());
 
@@ -113,7 +123,6 @@ int main( void )
         Task_USB_Upkeep();
 
         Task_Run_If_Ready( &task_message_handling );
-        Task_Run_If_Ready( &task_battery_filter );
 
         Task_USB_Upkeep();
         Task_Run_If_Ready( &task_send_encoder_now );
