@@ -172,9 +172,8 @@ void USB_Send_Byte( uint8_t byte )
     // YOUR CODE HERE
     // This should only interface with the ring buffers and use your ring buffer functions.
 
-	if (rb_length_B(&_usb_send_buffer) < RB_LENGTH_B - 2){
-        rb_push_back_B( &_usb_send_buffer, byte );
-    }
+    rb_push_back_B( &_usb_send_buffer, byte );
+    
 }
 
 /**
