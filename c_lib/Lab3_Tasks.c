@@ -5,17 +5,34 @@
 //static float _battery_filtered = 0.0f;
 void Send_Loop_Battery( float _time_since_last )
 {
-    float voltage = Filter_Last_Output( &battery_filter );
-    USB_Send_Msg("cf",'B', &voltage, sizeof(voltage));
+    //float voltage = Filter_Last_Output( &battery_filter );
+    //USB_Send_Msg("cf",'B', &voltage, sizeof(voltage));
     //USB_Send_Msg("cf",'B', &_battery_filtered, sizeof(&_battery_filtered));
+
+    struct __attribute__((__packed__)) {
+        float voltage;
+    } data;
+    data.voltage = Filter_Last_Output(&battery_filter);
+    USB_Send_Msg("cf",'B', &data, sizeof(data));
+    if(data.voltage < 4.0f){
+        struct __attribute__((__packed__)) {
+            char let[7];
+            float volt;
+        } msg = { .let = {'B','A','T',' ','L','O','W'}, .volt = data.voltage };
+        USB_Send_Msg("c7sf", '!', &msg, sizeof(msg));
+
+    }
 }
 void Send_Battery_Now( float _time_since_last )
 {
   //float voltage = Filter_Last_Output( &battery_filter );
-  float voltage = Battery_Voltage();
-  USB_Send_Msg("cf",'b', &voltage, sizeof(voltage));
+  struct __attribute__((__packed__)) {
+        float voltage;
+    } data;
+  data.voltage = Battery_Voltage();
+  USB_Send_Msg("cf",'b', &data, sizeof(data));
   //USB_Send_Msg("cff",'b', &data, sizeof(data));
-   // USB_Send_Msg("c",'b', &_battery_filtered, sizeof(_battery_filtered));
+  // USB_Send_Msg("c",'b', &_battery_filtered, sizeof(_battery_filtered));
 }
 
 void Send_Encoder_Now( float _time_since_last )
@@ -39,7 +56,7 @@ void Send_Loop_Encoder( float _time_since_last )
     data.right = Encoder_Counts_Right();
     USB_Send_Msg("cii",'E', &data, sizeof(data));
 }
-
+/*
 void Check_Battery_Voltage( float _time_since_last )
 {
     float bat = Filter_Last_Output( &battery_filter );
@@ -52,7 +69,21 @@ void Check_Battery_Voltage( float _time_since_last )
         USB_Send_Msg("c7sf", '!', &msg, sizeof(msg));
     }
 }
+*/
 
+void Battery_Filter_Update( float _time_since_last ) 
+{
+    float data = Battery_Voltage();
+    if (data > 4.0f) {
+        float current = Filter_Last_Output(&battery_filter);
+        if (current != current || current <= 0.0f || current > 15.0f)
+            Filter_SetTo(&battery_filter, data);
+        Filter_Value(&battery_filter, data);
+    }
+
+    //_battery_filtered = (BATTERY_B * data) + (BATTERY_A * _battery_filtered);
+}
+/*
 void Battery_Filter_Update( float _time_since_last ) 
 {
     float data = Battery_Voltage();
@@ -61,11 +92,12 @@ void Battery_Filter_Update( float _time_since_last )
         if (result != result || result <= 0.0f || result > 15.0f){
             Filter_SetTo(&battery_filter, data);
         }
-        Filter_Value(&battery_filter, data);
+        //Filter_Value(&battery_filter, data);
     }
 
     //_battery_filtered = (BATTERY_B * data) + (BATTERY_A * _battery_filtered);
 }
+*/
 
 /*
 void Battery_Filter_Update( float _time_since_last )

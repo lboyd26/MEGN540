@@ -25,6 +25,8 @@ void Initialize_Battery_Monitor()
     // ADCSRA: enable ADC (ADEN=1), prescaler 128 (ADPS2:0 = 111)
     ADCSRA = ( 1 << ADEN ) | ( 1 << ADPS2 ) | ( 1 << ADPS1 ) | ( 1 << ADPS0 );
 
+    ADMUX &= ~(1<<ADLAR);
+
     ADCSRA |= ( 1 << ADSC );
     while( ADCSRA & ( 1 << ADSC ) );
 }
