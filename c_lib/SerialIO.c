@@ -133,10 +133,10 @@ void Task_USB_Upkeep()
     // Each iteration you should send what you have in the buffer
     // and get what is there to get from the buffer.
     // this is done by leveraging your _USB_Read_Data and _USB_Write_Data functions
-    cli();
+
     _USB_Read_Data();
     _USB_Write_Data();
-    sei();
+
 }
 
 /** Function to manage CDC data transmission and reception to and from the host for the second CDC interface, which echoes back
