@@ -1,5 +1,8 @@
 #include "Lab3_Tasks.h"
 
+static Filter_Data_t battery_filter;
+static bool battery_filter_initalized = false;
+
 //#define BATTERY_B (0.11162f)
 //#define BATTERY_A (0.88838f)
 //static float _battery_filtered = 0.0f;
@@ -25,12 +28,13 @@ void Send_Loop_Battery( float _time_since_last )
 }
 void Send_Battery_Now( float _time_since_last )
 {
+
   //float voltage = Filter_Last_Output( &battery_filter );
   struct __attribute__((__packed__)) {
         float voltage;
     } data;
-  data.voltage = Battery_Voltage();
-  USB_Send_Msg("cf",'b', &data, sizeof(data));
+    data.voltage = Filter_Last_Output(&battery_filter);
+    USB_Send_Msg("cf",'b', &data, sizeof(data));
   //USB_Send_Msg("cff",'b', &data, sizeof(data));
   // USB_Send_Msg("c",'b', &_battery_filtered, sizeof(_battery_filtered));
 }
@@ -74,12 +78,19 @@ void Check_Battery_Voltage( float _time_since_last )
 void Battery_Filter_Update( float _time_since_last ) 
 {
     float data = Battery_Voltage();
-    if (data > 4.0f) {
-        float current = Filter_Last_Output(&battery_filter);
-        if (current != current || current <= 0.0f || current > 15.0f)
-            Filter_SetTo(&battery_filter, data);
-        Filter_Value(&battery_filter, data);
-    }
+
+    float pi = 3.14159265358979323846; //doubt need more accuracy...
+    float T = 0.002f; //period or measure every x seconds
+    float fc = 10; //cutoff frequency
+    float a = 2.0f * pi * fc * T;
+    float b_coeffs[] = { a / (1.0f + a), 0.0f };
+    float a_coeffs[] = { 1.0f, -1.0f / (1.0f + a) };
+
+    Filter_Init(&battery_filter, b_coeffs, a_coeffs, 1);
+    Filter_SetTo(&battery_filter, Battery_Voltage());
+    battery_filter_initalized = true;
+    
+    Filter_Value(&battery_filter, data);    
 
     //_battery_filtered = (BATTERY_B * data) + (BATTERY_A * _battery_filtered);
 }

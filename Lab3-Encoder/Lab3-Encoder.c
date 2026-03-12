@@ -53,12 +53,7 @@ void Initialize_Modules( float _time_not_used_ )
 {
     // Initialize (reinitialize) all global variables
     
-    float pi = 3.14159265358979323846; //doubt need more accuracy...
-    float T = 0.002f; //period or measure every x seconds
-    float fc = 10; //cutoff frequency
-    float a = 2.0f * pi * fc * T;
-    float b_coeffs[] = { a / (1.0f + a), 0.0f };
-    float a_coeffs[] = { 1.0f, -1.0f / (1.0f + a) };
+    float T = 0.002f;
     
     //float T = 0.002; //period or measure every x seconds
 
@@ -79,10 +74,6 @@ void Initialize_Modules( float _time_not_used_ )
     //Filter_SetTo( &battery_filter, Battery_Voltage() );
     //battery_filter_initialized = true;
 
-
-
-    Filter_Init(&battery_filter, b_coeffs, a_coeffs, 1);
-    Filter_SetTo(&battery_filter, Battery_Voltage());
 
     // Setup task handling 
     Initialize_Task( &task_restart, Initialize_Modules /*function pointer to call*/ );
