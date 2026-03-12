@@ -59,9 +59,11 @@ void Battery_Filter_Update( float _time_since_last )
     float data = Battery_Voltage();
     if (data > 0.5f) {
         float result = Filter_Value(&battery_filter, data);
-        if (result != result){
+        if (result != result || result <= 0.0f || result > 15.0f){
             Filter_SetTo(&battery_filter, data);
         }
+        Filter_Value(&battery_filter, data);
     }
+
     //_battery_filtered = (BATTERY_B * data) + (BATTERY_A * _battery_filtered);
 }

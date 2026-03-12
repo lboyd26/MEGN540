@@ -9,6 +9,8 @@ static const float BITS_TO_BATTERY_VOLTS = 5.0 * 2.0 / 1023.0;
  
 void Initialize_Battery_Monitor()
 {
+    ADCSRA |= (1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0) | (1 << ADEN);
+    /*
     // *** MEGN540 LAB3 YOUR CODE HERE ***
 
     ADCSRA |= (1 << ADPS2) | (1 << ADPS1) | (1 << ADPS0); // set to 125 kHz
@@ -21,7 +23,10 @@ void Initialize_Battery_Monitor()
     //ADMUX &= ~(1<<ADLAR);
     
     //missing DIDR0, check MUX, REFS1
-    ADCSRB &= -(1 << MUX5);
+    ADCSRB &= ~(1 << MUX5);
+
+    DDRF &= ~(1 << PF6);
+    PORTF &= ~(1 << PF6);
 
     //DIDR0 &= ~(1<<ADC0D);
     //DIDR0 &= ~(1<<ADC6D);
@@ -33,6 +38,7 @@ void Initialize_Battery_Monitor()
     while(bit_is_set(ADCSRA, ADSC)) {}
     (void)ADCL;
     (void)ADCH;
+    */
 }
 
 /**
@@ -41,6 +47,8 @@ void Initialize_Battery_Monitor()
 
 float Battery_Voltage()
 {
+    ADCSRB = 0;
+    ADMUX =  (1 << REFS0) | (1 << MUX1) | (1 << MUX2);
     // A Union to assist with reading the LSB and MSB in the  16 bit register
     union {
         struct {
