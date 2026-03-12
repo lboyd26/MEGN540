@@ -274,13 +274,12 @@ void Task_Message_Handling( float _time_since_last )
 
     //********* MEGN540 -- LAB 2 ************//
      if( command_processed ) {
-         // RESET the WATCHDOG TIMER
-         Task_Cancel( &task_message_handling_watchdog );
-    }else {
-        if(!task_message_handling_watchdog.is_active) {
-            Task_Activate( &task_message_handling_watchdog, 0.1 );
-        }
+    Task_Activate( &task_message_handling_watchdog, 0.5 );
+} else if( USB_Msg_Length() > 0 ) {
+    if( !task_message_handling_watchdog.is_active ) {
+        Task_Activate( &task_message_handling_watchdog, 0.5 );
     }
+}
 }
 
 /**
