@@ -353,10 +353,10 @@ void USB_Flush_Input_Buffer()
     // *** MEGN540  ***
     // YOUR CODE HERE
     // This should only interface with the ring buffers and use your ring buffer functions.
-    while (rb_length_B( &_usb_receive_buffer )> 0){
-        rb_pop_front_B( &_usb_receive_buffer );
-    }
-    //rb_initialize_B( &_usb_receive_buffer );
+    //while (rb_length_B( &_usb_receive_buffer )> 0){
+        //rb_pop_front_B( &_usb_receive_buffer );
+    //}
+    rb_initialize_B( &_usb_receive_buffer );
 }
 
 /** Configures the board hardware and chip peripherals for the demo's functionality. */
