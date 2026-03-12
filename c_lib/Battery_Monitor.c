@@ -1,6 +1,6 @@
 #include "Battery_Monitor.h"
 
-static const float BITS_TO_BATTERY_VOLTS = 5 * 2.0 / 1023.0;
+static const float BITS_TO_BATTERY_VOLTS = 5.0 * 2.0 / 1023.0;
 
 /**
  * Function Initialize_Battery_Monitor initializes the Battery Monitor to record the current battery voltages.
@@ -16,21 +16,23 @@ void Initialize_Battery_Monitor()
     //ADMUX &= ~(1<<MUX0);
     //ADMUX &= ~(1<<MUX3);
     ADMUX =  (1 << REFS0) | (1 << MUX1) | (1 << MUX2); // Internal 2.56V Voltage Reference with external capacitor on AREF pin
+    //ADMUX = (1 << REFS0) | (1 << MUX0);
     //ADMUX &= ~(1<<REFS1);
     //ADMUX &= ~(1<<ADLAR);
     
     //missing DIDR0, check MUX, REFS1
-    ADCSRB &= ~(1 << MUX5);
+    ADCSRB &= -(1 << MUX5);
 
-    DIDR0 &= ~(1<<ADC0D);
-    DIDR0 &= ~(1<<ADC6D);
+    //DIDR0 &= ~(1<<ADC0D);
+    //DIDR0 &= ~(1<<ADC6D);
+    DIDR0 |= (1 << ADC6D);
 
     ADCSRA |= (1 << ADEN);
 
     ADCSRA |= (1 << ADSC);          
     while(bit_is_set(ADCSRA, ADSC)) {}
     (void)ADCL;
-    (void)ADCL;
+    (void)ADCH;
 }
 
 /**

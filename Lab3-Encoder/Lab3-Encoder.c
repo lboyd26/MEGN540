@@ -71,6 +71,9 @@ void Initialize_Modules( float _time_not_used_ )
     Initialize_Encoders();
     Initialize_Battery_Monitor();
 
+    Filter_Init(&battery_filter, b_coeffs, a_coeffs, 1);
+    Filter_SetTo(&battery_filter, Battery_Voltage());
+
     // Setup task handling 
     Initialize_Task( &task_restart, Initialize_Modules /*function pointer to call*/ );
 
@@ -92,8 +95,6 @@ void Initialize_Modules( float _time_not_used_ )
     Task_Activate(&task_battery_status, 1.0f); //see if needs charging every 1 second forever
 
     Initialize_Task(&task_battery_filter, Battery_Filter_Update);
-    Filter_Init(&battery_filter, b_coeffs, a_coeffs, 1);
-    Filter_SetTo(&battery_filter, Battery_Voltage());
     Task_Activate(&task_battery_filter, T);
 }
 
