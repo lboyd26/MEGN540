@@ -190,7 +190,8 @@ void USB_Send_Data( void* p_data, uint8_t data_len )
 	uint8_t* p_byte = (uint8_t*) p_data;
 
 	for (uint8_t i = 0; i < data_len; i++){
-	USB_Send_Byte( p_byte[i] );
+	//USB_Send_Byte( p_byte[i] );
+	rb_push_back_B( &_usb_send_buffer, p_bytes[i] );
 	}
 
 }
