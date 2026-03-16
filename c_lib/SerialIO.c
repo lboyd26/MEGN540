@@ -1,64 +1,5 @@
-/*
-         MEGN540 Mechatronics Lab
-    Copyright (C) Andrew Petruska, 2021.
-       apetruska [at] mines [dot] edu
-          www.mechanical.mines.edu
-*/
-
-/*
-    Copyright (c) 2021 Andrew Petruska at Colorado School of Mines
-
-    Permission is hereby granted, free of charge, to any person obtaining a copy
-    of this software and associated documentation files (the "Software"), to deal
-    in the Software without restriction, including without limitation the rights
-    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-    copies of the Software, and to permit persons to whom the Software is
-    furnished to do so, subject to the following conditions:
-
-    The above copyright notice and this permission notice shall be included in all
-    copies or substantial portions of the Software.
-
-    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-    SOFTWARE.
-
-*/
-
-/*
-  Copyright 2020  Dean Camera (dean [at] fourwalledcubicle [dot] com)
-
-  Permission to use, copy, modify, distribute, and sell this
-  software and its documentation for any purpose is hereby granted
-  without fee, provided that the above copyright notice appear in
-  all copies and that both that the copyright notice and this
-  permission notice and warranty disclaimer appear in supporting
-  documentation, and that the name of the author not be used in
-  advertising or publicity pertaining to distribution of the
-  software without specific, written prior permission.
-
-  The author disclaims all warranties with regard to this
-  software, including all implied warranties of merchantability
-  and fitness.  In no event shall the author be liable for any
-  special, indirect or consequential damages or any damages
-  whatsoever resulting from loss of use, data or profits, whether
-  in an action of contract, negligence or other tortious action,
-  arising out of or in connection with the use or performance of
-  this software.
-*/
-
-/** \file
- *
- *  Main source file for the DualVirtualSerial demo. This file contains the main tasks of the demo and
- *  is responsible for the initial application hardware configuration.
- */
-
 #include "SerialIO.h"
 
-// *** MEGN540  ***
 // Internal Ring Buffer Objects
 static Ring_Buffer_Byte_t _usb_receive_buffer;
 static Ring_Buffer_Byte_t _usb_send_buffer;
@@ -66,29 +7,20 @@ static Ring_Buffer_Byte_t _usb_send_buffer;
 /**
  * (non-blocking) Internal function _USB_Read_Data takes the next USB byte and reads it
  * into a ring buffer for latter processing.
- *
  */
 static void _USB_Read_Data()
 {
-    // *** MEGN540  ***
-    // YOUR CODE HERE!  You'll need to take inspiration from the Task_USB_Echo above but
-    // will need to adjust to make it non blocking. You'll need to dig into the library to understand
-    // how the function above is working then interact at a slightly lower level, but still higher than
-    // register level.
-
-    if (USB_DeviceState != DEVICE_STATE_Configured){
+    if( USB_DeviceState != DEVICE_STATE_Configured )
         return;
-    }
 
-	Endpoint_SelectEndpoint( CDC_RX_EPADDR );
+    Endpoint_SelectEndpoint( CDC_RX_EPADDR );
 
-    if (Endpoint_IsOUTReceived()){
-        uint16_t DataLength = Endpoint_BytesInEndpoint();
+    if( Endpoint_IsOUTReceived() ) {
+        while( Endpoint_BytesInEndpoint() > 0 ) {
+            uint8_t byte = Endpoint_Read_8();
+            rb_push_back_B( &_usb_receive_buffer, byte );
+        }
 
-        for (uint16_t i = 0; i < DataLength; i++){
-			uint8_t byte = Endpoint_Read_8();
-			rb_push_back_B( &_usb_receive_buffer, byte );
-		}
         Endpoint_ClearOUT();
     }
 }
@@ -99,28 +31,18 @@ static void _USB_Read_Data()
  */
 static void _USB_Write_Data()
 {
-    // *** MEGN540  ***
-    // YOUR CODE HERE!  You'll need to take inspiration from the Task_USB_Echo above but
-    // will need to adjust to make it non blocking. You'll need to dig into the library to understand
-    // how the function above is working then interact at a slightly lower level, but still higher than
-    // register level.
-
-    if (USB_DeviceState != DEVICE_STATE_Configured){
+    if( USB_DeviceState != DEVICE_STATE_Configured ) {
         return;
     }
 
-	Endpoint_SelectEndpoint( CDC_TX_EPADDR );
+    Endpoint_SelectEndpoint( CDC_TX_EPADDR );
 
-    if (Endpoint_IsINReady()){
-		while (rb_length_B( &_usb_send_buffer ) > 0){
+    if( Endpoint_IsINReady() && rb_length_B( &_usb_send_buffer ) > 0 ) {
+        while( rb_length_B( &_usb_send_buffer ) > 0 ) {
+            uint8_t byte = rb_pop_front_B( &_usb_send_buffer );
+            Endpoint_Write_8( byte );
+        }
 
-			if (!Endpoint_IsReadWriteAllowed()){
-				break;
-			}
-
-        	uint8_t byte = rb_pop_front_B( &_usb_send_buffer );
-			Endpoint_Write_8( byte );
-		}
         Endpoint_ClearIN();
     }
 }
@@ -133,10 +55,8 @@ void Task_USB_Upkeep()
     // Each iteration you should send what you have in the buffer
     // and get what is there to get from the buffer.
     // this is done by leveraging your _USB_Read_Data and _USB_Write_Data functions
-
     _USB_Read_Data();
     _USB_Write_Data();
-
 }
 
 /** Function to manage CDC data transmission and reception to and from the host for the second CDC interface, which echoes back
@@ -144,10 +64,42 @@ void Task_USB_Upkeep()
  */
 void Task_USB_Echo( void )
 {
+    /* Device must be connected and configured for the task to run */
+    if( USB_DeviceState != DEVICE_STATE_Configured )
+        return;
 
-	if( rb_length_B( &_usb_receive_buffer ) != 0 ){
-		rb_push_back_B( &_usb_send_buffer, rb_pop_front_B( &_usb_receive_buffer ) );
-	}
+    /* Select the Serial Rx Endpoint */
+    Endpoint_SelectEndpoint( CDC_RX_EPADDR );
+
+    /* Check to see if any data has been received */
+    if( Endpoint_IsOUTReceived() ) {
+        /* Create a temp buffer big enough to hold the incoming endpoint packet */
+        uint8_t Buffer[Endpoint_BytesInEndpoint()];
+
+        /* Remember how large the incoming packet is */
+        uint16_t DataLength = Endpoint_BytesInEndpoint();
+
+        /* Read in the incoming packet into the buffer */
+        Endpoint_Read_Stream_LE( &Buffer, DataLength, NULL );
+
+        /* Finalize the stream transfer to send the last packet */
+        Endpoint_ClearOUT();
+
+        /* Select the Serial Tx Endpoint */
+        Endpoint_SelectEndpoint( CDC_TX_EPADDR );
+
+        /* Write the received data to the endpoint */
+        Endpoint_Write_Stream_LE( &Buffer, DataLength, NULL );
+
+        /* Finalize the stream transfer to send the last packet */
+        Endpoint_ClearIN();
+
+        /* Wait until the endpoint is ready for the next packet */
+        Endpoint_WaitUntilReady();
+
+        /* Send an empty packet to prevent host buffering */
+        Endpoint_ClearIN();
+    }
 
     // ************** MEGN540 FOR DEBUGGING ***************** //
     // once you get your _USB_Read_Data and _USB_Write_Data to work with your ring buffers
@@ -168,12 +120,7 @@ void Task_USB_Echo( void )
  */
 void USB_Send_Byte( uint8_t byte )
 {
-    // *** MEGN540  ***
-    // YOUR CODE HERE
-    // This should only interface with the ring buffers and use your ring buffer functions.
-
     rb_push_back_B( &_usb_send_buffer, byte );
-    
 }
 
 /**
@@ -183,17 +130,11 @@ void USB_Send_Byte( uint8_t byte )
  */
 void USB_Send_Data( void* p_data, uint8_t data_len )
 {
-    // *** MEGN540  ***
-    // YOUR CODE HERE
-    // This should only interface with the ring buffers and use your ring buffer functions.
+    uint8_t* bytes = (uint8_t*)p_data;
 
-	uint8_t* p_byte = (uint8_t*) p_data;
-
-	for (uint8_t i = 0; i < data_len; i++){
-	//USB_Send_Byte( p_byte[i] );
-	rb_push_back_B( &_usb_send_buffer, p_bytes[i] );
-	}
-
+    for( uint8_t i = 0; i < data_len; i++ ) {
+        rb_push_back_B( &_usb_send_buffer, bytes[i] );
+    }
 }
 
 /**
@@ -202,35 +143,11 @@ void USB_Send_Data( void* p_data, uint8_t data_len )
  */
 void USB_Send_Str( char* p_str )
 {
-    // *** MEGN540  ***
-    // YOUR CODE HERE. Remember c-srtings are null terminated, so make sure to send that zero!
-    // This should only interface with the ring buffers and use your ring buffer functions.
-
-
-	uint8_t i = 0;
-
-	while (p_str[i] != '\0'){
-		USB_Send_Byte( (uint8_t) p_str[i] );
-		i++;
-	}
-
-	//USB_Send_Byte( 0 );
-	rb_push_back_B( &_usb_send_buffer, '\0' );
-
-
-    /*
-     if (p_str == NULL) {
-        return;
-    }
-
-	while (*p_str != '\0'){
-		rb_push_back_B(&_usb_send_buffer, (uint8_t)*p_str);
+    while( *p_str != '\0' ) {
+        rb_push_back_B( &_usb_send_buffer, (uint8_t)*p_str );
         p_str++;
-	}
-
-	rb_push_back_B(&_usb_receive_buffer, '\0');
-    */
-
+    }
+    rb_push_back_B( &_usb_send_buffer, '\0' );
 }
 
 /**
@@ -251,36 +168,22 @@ void USB_Send_Str( char* p_str )
  * @param p_data [void*] pointer to the data-object to send.
  * @param data_len [uint8_t] size of the data-object to send. Remember sizeof() can help you with this!
  */
-void USB_Send_Msg( char* format, char cmd, void* p_data, uint8_t data_len ) {
-    // *** MEGN540  ***
-    // YOUR CODE HERE. Remember c-strings are null terminated. Use the above functions to help!
-
-    // FUNCTION BEGIN
-    //  Calculate the length of the format string taking advantage of the null-termination (+1 for null termination)
-    //  Calculate the total message length:  1 + format_length + data_len
-    //  Send data:
-    //      usb_send_byte <-- length
-    //      usb_send_str  <-- format (with trailing zero)
-    //      usb_send_byte <-- cmd
-    //      usb_send_data <-- p_data
-    // FUNCTION END
-
+void USB_Send_Msg( char* format, char cmd, void* p_data, uint8_t data_len )
+{
     uint8_t format_length = 0;
-    while (format[format_length] != '\0'){
+    while( format[format_length] != '\0' ) {
         format_length++;
     }
     format_length++;
 
-    uint8_t total_length = format_length + data_len + 1;
+    uint8_t msg_length = format_length + 1 + data_len;
 
-    uint8_t space_available = (RB_LENGTH_B - 1) - rb_length_B(&_usb_send_buffer);
-    if (space_available < total_length + 1){
-        return;
-    }
+    USB_Send_Byte( msg_length );
 
-    USB_Send_Byte( total_length );
     USB_Send_Str( format );
-    USB_Send_Byte( (uint8_t) cmd );
+
+    USB_Send_Byte( (uint8_t)cmd );
+
     USB_Send_Data( p_data, data_len );
 }
 
@@ -290,10 +193,16 @@ void USB_Send_Msg( char* format, char cmd, void* p_data, uint8_t data_len ) {
  */
 uint8_t USB_Msg_Length()
 {
-    // *** MEGN540  ***
-    // YOUR CODE HERE
-    // This should only interface with the ring buffers and use your ring buffer functions.
     return rb_length_B( &_usb_receive_buffer );
+}
+
+/**
+ * (non-blocking) Function USB_Send_Buffer_Empty returns true if the send buffer is empty.
+ * @return [bool] True if send buffer is empty, false otherwise.
+ */
+bool USB_Send_Buffer_Empty()
+{
+    return rb_length_B( &_usb_send_buffer ) == 0;
 }
 
 /**
@@ -302,9 +211,9 @@ uint8_t USB_Msg_Length()
  */
 uint8_t USB_Msg_Peek()
 {
-    // *** MEGN540  ***
-    // YOUR CODE HERE
-    // This should only interface with the ring buffers and use your ring buffer functions.
+    if( rb_length_B( &_usb_receive_buffer ) == 0 ) {
+        return 0;
+    }
     return rb_get_B( &_usb_receive_buffer, 0 );
 }
 
@@ -314,9 +223,9 @@ uint8_t USB_Msg_Peek()
  */
 uint8_t USB_Msg_Get()
 {
-    // *** MEGN540  ***
-    // YOUR CODE HERE
-    // This should only interface with the ring buffers and use your ring buffer functions.
+    if( rb_length_B( &_usb_receive_buffer ) == 0 ) {
+        return 0;
+    }
     return rb_pop_front_B( &_usb_receive_buffer );
 }
 
@@ -331,17 +240,16 @@ uint8_t USB_Msg_Get()
  */
 bool USB_Msg_Read_Into( void* p_obj, uint8_t data_len )
 {
-    // *** MEGN540  ***
-    // YOUR CODE HERE
-    // This should only interface with the ring buffers and use your ring buffer functions.
-    if (USB_Msg_Length() < data_len) {
+    if( rb_length_B( &_usb_receive_buffer ) < data_len ) {
         return false;
     }
 
-    uint8_t* p_byte = (uint8_t*) p_obj;
-    for (uint8_t i = 0; i < data_len; i++) {
-        p_byte[i] = USB_Msg_Get();
+    uint8_t* byte_ptr = (uint8_t*)p_obj;
+
+    for( uint8_t i = 0; i < data_len; i++ ) {
+        byte_ptr[i] = rb_pop_front_B( &_usb_receive_buffer );
     }
+
     return true;
 }
 
@@ -351,12 +259,6 @@ bool USB_Msg_Read_Into( void* p_obj, uint8_t data_len )
  */
 void USB_Flush_Input_Buffer()
 {
-    // *** MEGN540  ***
-    // YOUR CODE HERE
-    // This should only interface with the ring buffers and use your ring buffer functions.
-    //while (rb_length_B( &_usb_receive_buffer )> 0){
-        //rb_pop_front_B( &_usb_receive_buffer );
-    //}
     rb_initialize_B( &_usb_receive_buffer );
 }
 
@@ -374,7 +276,7 @@ void Initialize_USB( void )
     // It then goes and initializes the USB hardware redgesters and turns
     // on interrupt handeling (since lufa uses interrupts).
 
-#if( ARCH == ARCH_AVR8 )
+#if ( ARCH == ARCH_AVR8 )
     /* Disable watchdog if enabled by bootloader/fuses */
     MCUSR &= ~( 1 << WDRF );
     wdt_disable();
