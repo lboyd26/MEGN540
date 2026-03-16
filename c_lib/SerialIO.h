@@ -1,55 +1,3 @@
-/*
-         MEGN540 Mechatronics Lab
-    Copyright (C) Andrew Petruska, 2021.
-       apetruska [at] mines [dot] edu
-          www.mechanical.mines.edu
-*/
-
-/*
-    Copyright (c) 2021 Andrew Petruska at Colorado School of Mines
-
-    Permission is hereby granted, free of charge, to any person obtaining a copy
-    of this software and associated documentation files (the "Software"), to deal
-    in the Software without restriction, including without limitation the rights
-    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-    copies of the Software, and to permit persons to whom the Software is
-    furnished to do so, subject to the following conditions:
-
-    The above copyright notice and this permission notice shall be included in all
-    copies or substantial portions of the Software.
-
-    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-    SOFTWARE.
-
-*/
-
-/*
-  Copyright 2020  Dean Camera (dean [at] fourwalledcubicle [dot] com)
-
-  Permission to use, copy, modify, distribute, and sell this
-  software and its documentation for any purpose is hereby granted
-  without fee, provided that the above copyright notice appear in
-  all copies and that both that the copyright notice and this
-  permission notice and warranty disclaimer appear in supporting
-  documentation, and that the name of the author not be used in
-  advertising or publicity pertaining to distribution of the
-  software without specific, written prior permission.
-
-  The author disclaims all warranties with regard to this
-  software, including all implied warranties of merchantability
-  and fitness.  In no event shall the author be liable for any
-  special, indirect or consequential damages or any damages
-  whatsoever resulting from loss of use, data or profits, whether
-  in an action of contract, negligence or other tortious action,
-  arising out of or in connection with the use or performance of
-  this software.
-*/
-
 #ifndef _SERIAL_IO_H_
 #define _SERIAL_IO_H_
 
@@ -64,11 +12,10 @@
 
 #include <string.h>
 
-// *** MEGN540  ***
 // Include your Ring_Buffer homework code.
 #ifndef RING_BUFFER_H  // check guard to see if "Ring_Buffer.h" has already been included. If not set ring buffer length
 // Define max rignbuffer size here so we have more than enough for the longest message we will send.
-#    define RB_LENGTH_B 64
+#    define RB_LENGTH_B 128
 #elif RB_LENGTH_B < 32  // check to see if set RB_LENGTH_IS large enough
 #    warning Ring_Buffer created before SerialIO.h. Ring buffer length is too small for serial messages. Consider revising include ordering.
 #endif
@@ -137,6 +84,12 @@ void USB_Send_Msg( char* format, char cmd, void* p_data, uint8_t data_len );
  * @return [uint8_t] Number of bytes ready for processing.
  */
 uint8_t USB_Msg_Length();
+
+/**
+ * (non-blocking) Function USB_Send_Buffer_Empty returns true if the send buffer is empty.
+ * @return [bool] True if send buffer is empty, false otherwise.
+ */
+bool USB_Send_Buffer_Empty();
 
 /**
  * (non-blocking) Function USB_Msg_Peek returns (without removal) the next byte in teh receive buffer (null if empty).
