@@ -1,7 +1,7 @@
 #include "Lab3_Tasks.h"
 
 static Filter_Data_t battery_filter;
-static bool battery_filter_initalized = false;
+//static bool battery_filter_initialized = false;
 
 void Send_Loop_Battery( float _time_since_last )
 {
@@ -12,11 +12,11 @@ void Send_Loop_Battery( float _time_since_last )
     } data;
     data.voltage = Filter_Last_Output(&battery_filter);
     USB_Send_Msg("cf",'B', &data, sizeof(data));
-    if(data.voltage < 4.0f){
+    if(Filter_Last_Output(&battery_filter) < 4.0f){
         struct __attribute__((__packed__)) {
             char let[7];
             float volt;
-        } msg = { .let = {'B','A','T',' ','L','O','W'}, .volt = data.voltage };
+        } msg = { .let = {'B','A','T',' ','L','O','W'}, .volt = Filter_Last_Output(&battery_filter) };
         USB_Send_Msg("c7sf", '!', &msg, sizeof(msg));
 
     }
@@ -58,19 +58,20 @@ void Send_Loop_Encoder( float _time_since_last )
 
 void Battery_Filter_Update( float _time_since_last ) 
 {
-    float data = Battery_Voltage();
+    //if (!battery_filter_initialized){
+        //float data = Battery_Voltage();
 
-    float pi = 3.14159265358979323846; //doubt need more accuracy...
-    float T = 0.002f; //period or measure every x seconds
-    float fc = 10; //cutoff frequency
-    float a = 2.0f * pi * fc * T;
-    float b_coeffs[] = { a / (1.0f + a), 0.0f };
-    float a_coeffs[] = { 1.0f, -1.0f / (1.0f + a) };
+        float pi = 3.14159265358979323846; //doubt need more accuracy...
+        float T = 0.002f; //period or measure every x seconds
+        float fc = 10; //cutoff frequency
+        float a = 2.0f * pi * fc * T;
+        float b_coeffs[] = { a / (1.0f + a), 0.0f };
+        float a_coeffs[] = { 1.0f, -1.0f / (1.0f + a) };
 
-    Filter_Init(&battery_filter, b_coeffs, a_coeffs, 1);
-    Filter_SetTo(&battery_filter, Battery_Voltage());
-    battery_filter_initalized = true;
+        Filter_Init(&battery_filter, b_coeffs, a_coeffs, 1);
+        Filter_SetTo(&battery_filter, Battery_Voltage());
+        //battery_filter_initialized = true;
+    //}
     
-    Filter_Value(&battery_filter, data);    
-
+    Filter_Value(&battery_filter, Battery_Voltage());   
 }
