@@ -24,9 +24,9 @@ void Send_Loop_Battery( float _time_since_last )
             USB_Send_Msg("c7sf", '!', &msg, sizeof(msg));
             warned = true;
         }
+    }
     else{
         warned = false;
-    }
 
     }
 
