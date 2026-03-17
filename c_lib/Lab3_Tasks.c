@@ -13,23 +13,6 @@ void Send_Loop_Battery( float _time_since_last )
     data.voltage = Filter_Last_Output(&battery_filter);
     USB_Send_Msg("cf",'B', &data, sizeof(data));
 
-
-    static bool warned = false;
-    if(Filter_Last_Output(&battery_filter) < 4.0f){
-        if (!warned){
-            struct __attribute__((__packed__)) {
-                char let[7];
-                float volt;
-            } msg = { .let = {'B','A','T',' ','L','O','W'}, .volt = Filter_Last_Output(&battery_filter) };
-            USB_Send_Msg("c7sf", '!', &msg, sizeof(msg));
-            warned = true;
-        }
-    }
-    else{
-        warned = false;
-
-    }
-
 }
 void Send_Battery_Now( float _time_since_last )
 {
@@ -84,5 +67,20 @@ void Battery_Filter_Update( float _time_since_last )
     }
     
     Filter_Value(&battery_filter, Battery_Voltage());
+    //static bool warned = false;
+    if(Filter_Last_Output(&battery_filter) < 4.0f && Filter_Last_Output(&battery_filter) > 0.5f){
+        //if (!warned){
+            struct __attribute__((__packed__)) {
+                char let[7];
+                float volt;
+            } msg = { .let = {'B','A','T',' ','L','O','W'}, .volt = Filter_Last_Output(&battery_filter) };
+            USB_Send_Msg("c7sf", '!', &msg, sizeof(msg));
+            //warned = true;
+        //}
+    }
+    //else{
+        //warned = false;
+
+    //}
        
 }

@@ -50,7 +50,7 @@ Task_t task_send_encoder_now;
 Task_t task_send_encoder_loop;            
 Task_t task_send_battery_now;
 Task_t task_send_battery_loop;
-Task_t task_battery_status;
+//Task_t task_battery_status;
 Task_t task_battery_filter;
 
 // Put your lab-specific task functionality and data_structures (if necessary) here so it is accessable to both
