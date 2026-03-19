@@ -7,18 +7,20 @@ void Set_PWM( int16_t left, int16_t right )
     MotorPWM_Set_Right(right);
 }
 
-void Stop_PWM_Delay()
+void Stop_PWM_Delay(float _time_since_last)
 {
     Set_PWM(0, 0);
     Task_Cancel(&task_stop_pwm);
 }
 
+/*
 void Schedule_PWM_Stop(float time)
 {
     Task_Activate(&task_stop_pwm, time);
 }
+*/
 
-void Stop_PWM()
+void Stop_PWM(float _time_since_last)
 {
     if (MotorPWM_Is_Enabled())
         {
@@ -26,7 +28,7 @@ void Stop_PWM()
         }
 }
 
-void Send_Identification()
+void Send_Identification(float _time_since_last)
 {
     struct __attribute__((__packed__)) {
         float time;

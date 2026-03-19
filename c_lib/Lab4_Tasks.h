@@ -48,15 +48,15 @@
 // e.g. Task_t task_restart;  ///<-- Lab 1: This flag indicates that the device received a restart command from the hoast. Default inactive.
 Task_t task_stop_pwm;
 Task_t task_send_identification_loop;
-Task_t task_schedule_pwm_stop;
+//Task_t task_schedule_pwm_stop;
 
 // Put your lab-specific task functionality and data_structures (if necessary) here so it is accessable to both
 // message handeling and the Lab main loops.
 // e.g. void Send_Time_Now( float _time_since_last );
 void Set_PWM( int16_t left, int16_t right);
-void Stop_PWM_Delay();
-void Schedule_PWM_Stop(float time)
-void Stop_PWM();
-void Send_Identification();
+void Stop_PWM_Delay(float _time_since_last);
+//void Schedule_PWM_Stop(float time);
+void Stop_PWM(float _time_since_last);
+void Send_Identification(float _time_since_last);
 
 #endif  // ifndef LAB4_TASKS_H
