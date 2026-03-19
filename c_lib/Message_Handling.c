@@ -262,6 +262,74 @@ void Task_Message_Handling( float _time_since_last )
                 command_processed = true;
             }
         }break; 
+        case 'p': {
+            //set pwm for L + R motors
+            if( USB_Msg_Length() >= _Message_Length( 'p' ) ) {
+                USB_Msg_Get();
+                struct __attribute__( ( __packed__ ) ) {
+                    int16_t left;
+                    int16_t right;
+                } data;
+                USB_Msg_Read_Into( &data, sizeof( data ) );
+                Set_PWM(data.left, data.right);
+                command_processed = true;
+            }
+        }break; 
+        case 'P': {
+            //set pwm for L + R motors, stop after delay
+            if( USB_Msg_Length() >= _Message_Length( 'P' ) ) {
+                USB_Msg_Get();
+                struct __attribute__( ( __packed__ ) ) {
+                    int16_t left;
+                    int16_t right;
+                    float period_ms;
+                } data;
+                USB_Msg_Read_Into( &data, sizeof( data ) );
+                Set_PWM(data.left, data.right);
+                Stop_PWM_Delay(data.period_ms / 1000.0f);
+                command_processed = true;
+            }
+        }break; 
+        case 's': {
+            //stop pwm for L + R motors
+            if( USB_Msg_Length() >= _Message_Length( 's' ) ) {
+                USB_Msg_Get();
+                Stop_PWM();
+                command_processed = true;
+            }
+        }break; 
+        case 'S': {
+            //stop pwm for L + R motors
+            if( USB_Msg_Length() >= _Message_Length( 'S' ) ) {
+                USB_Msg_Get();
+                Stop_PWM();
+                command_processed = true;
+            }
+        }break; 
+        case 'q': {
+            //get info
+            if( USB_Msg_Length() >= _Message_Length( 'q' ) ) {
+                USB_Msg_Get();
+                Send_Identification();
+                command_processed = true;
+            }
+        }break; 
+        case 'Q': {
+            //get info
+            if( USB_Msg_Length() >= _Message_Length( 'Q' ) ) {
+                USB_Msg_Get();
+                struct __attribute__( ( __packed__ ) ) {
+                    float period_ms;
+                } data;
+                USB_Msg_Read_Into( &data, sizeof( data ) );
+                if( data.period_ms <= 0){
+                    Task_Cancel(&task_send_identification_loop);
+                }else{
+                    Task_Activate(&task_send_identification_loop, data.period_ms / 1000.0f);
+                }
+                command_processed = true;
+            }
+        }break; 
         default:
         {
             // What to do if you dont recognize the command character

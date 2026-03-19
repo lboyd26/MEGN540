@@ -1,6 +1,6 @@
 #include "Lab3_Tasks.h"
 
-static Filter_Data_t battery_filter;
+Filter_Data_t battery_filter;
 static bool battery_filter_initialized = false;
 
 void Send_Loop_Battery( float _time_since_last )
