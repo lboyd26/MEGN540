@@ -1,4 +1,6 @@
 #include "MotorPWM.h"
+#include "Filter.h"
+extern Filter_Data_t battery_filter;
 
 void Initialize_MotorPWM( uint16_t MAX_PWM )
 {
