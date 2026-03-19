@@ -44,3 +44,20 @@ void Send_Identification(float _time_since_last)
     data.E_right = Encoder_Counts_Right();
     USB_Send_Msg("cf4h",'q', &data, sizeof(data));
 }
+
+void Send_Identification_Loop(float _time_since_last)
+{
+    struct __attribute__((__packed__)) {
+        float time;
+        int16_t PWM_left;
+        int16_t PWM_right;
+        int16_t E_left;
+        int16_t E_right;
+    } data;
+    data.time = Timing_Get_Time_Sec();
+    data.PWM_left = MotorPWM_Get_Left();
+    data.PWM_right = MotorPWM_Get_Right();
+    data.E_left = Encoder_Counts_Left();
+    data.E_right = Encoder_Counts_Right();
+    USB_Send_Msg("cf4h",'Q', &data, sizeof(data));
+}

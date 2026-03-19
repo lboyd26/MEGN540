@@ -58,5 +58,6 @@ void Stop_PWM_Delay(float _time_since_last);
 //void Schedule_PWM_Stop(float time);
 void Stop_PWM(float _time_since_last);
 void Send_Identification(float _time_since_last);
+void Send_Identification_Loop(float _time_since_last);
 
 #endif  // ifndef LAB4_TASKS_H

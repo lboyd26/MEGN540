@@ -90,7 +90,7 @@ void Initialize_Modules( float _time_not_used_ )
 
     //LAB 4
     Initialize_Task(&task_stop_pwm, Stop_PWM_Delay);
-    Initialize_Task(&task_send_identification_loop, Send_Identification);
+    Initialize_Task(&task_send_identification_loop, Send_Identification_Loop);
     //Initialize_Task(&task_schedule_pwm_stop, Schedule_PWM_Stop);
 }
 

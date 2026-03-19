@@ -314,7 +314,7 @@ void Task_Message_Handling( float _time_since_last )
             //get info
             if( USB_Msg_Length() >= _Message_Length( 'q' ) ) {
                 USB_Msg_Get();
-                Send_Identification();
+                Send_Identification(0.0f);
                 command_processed = true;
             }
         }break; 
