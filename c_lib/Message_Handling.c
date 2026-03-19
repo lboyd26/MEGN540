@@ -286,10 +286,10 @@ void Task_Message_Handling( float _time_since_last )
                 } data;
                 USB_Msg_Read_Into( &data, sizeof( data ) );
                 if( data.period_ms <= 0){
-                    Task_Cancel(&task_stop_pwm);
+                    Task_Cancel(&task_schedule_pwm_stop);
                 }else{
                     Set_PWM(data.left, data.right);
-                    Task_Activate(&task_stop_pwm, data.period_ms / 1000.0f);
+                    Task_Activate(&task_schedule_pwm_stop, data.period_ms / 1000.0f);
                 }
                 command_processed = true;
             }

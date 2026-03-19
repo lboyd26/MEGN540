@@ -7,10 +7,15 @@ void Set_PWM( int16_t left, int16_t right )
     MotorPWM_Set_Right(right);
 }
 
-void Stop_PWM_Delay( float time )
+void Stop_PWM_Delay()
 {
     Set_PWM(0, 0);
     Task_Cancel(&task_stop_pwm);
+}
+
+void Schedule_PWM_Stop(float time)
+{
+    Task_Activate(&task_stop_pwm, time);
 }
 
 void Stop_PWM()
