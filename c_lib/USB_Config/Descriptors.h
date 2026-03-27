@@ -82,7 +82,7 @@
 
 
 		/** Size in bytes of the CDC device-to-host notification IN endpoints. */
-		#define CDC_NOTIFICATION_EPSIZE        8
+		#define CDC_NOTIFICATION_EPSIZE        32
 
 		/** Size in bytes of the CDC data IN and OUT endpoints. */
 		#define CDC_TXRX_EPSIZE                64
