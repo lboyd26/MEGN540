@@ -58,10 +58,4 @@ void Task_Message_Handling( float _time_since_last );
  */
 void Task_Message_Handling_Watchdog( float _unused_ );
 
-/**
- * Function MSG_FLAG_Execute indicates if the action associated with the message flag
-should be executed in the main loop both because its active and because its time.
- */
-bool MSG_FLAG_Execute( MSG_FLAG_t* p_flag);
-
 #endif

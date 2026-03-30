@@ -39,20 +39,6 @@
 static uint8_t _Message_Length( char cmd );
 
 /**
- * Function MSG_FLAG_Execute indicates if the action associated with the message flag
-should be executed in the main loop both because its active and because its time.
- */
-bool MSG_FLAG_Execute( MSG_FLAG_t* p_flag) {
-    // OUR CODE HERE:
-    if(p_flag->is_active && Timing_Seconds_Since(&p_flag->time_last_ran) >= p_flag->run_period)
-    {
-        p_flag->time_last_ran = Timing_Get_Time(); 
-        return true; 
-    }
-    return false; 
-}
-
-/**
  * Function Task_Message_Handling processes USB messages as necessary and sets
  * status flags to control the flow of the program.
  */
@@ -68,11 +54,12 @@ void Task_Message_Handling( float _time_since_last )
     if( !USB_Msg_Length() )
         return;  // nothing to process...
 
-    // Get Your command designator without removal so if there are not enough
+    // Get Your command designator without removal so if their are not enough
     // bytes yet, the command persists
     char command = USB_Msg_Peek();
 
-     /* MEGN540 -- LAB 2 */ bool command_processed = false;
+    // /* MEGN540 -- LAB 2 */
+    bool command_processed = false;
 
     // process command
     switch( command ) {
@@ -100,26 +87,25 @@ void Task_Message_Handling( float _time_since_last )
                 // Call MEGN540_Lab_Task Function
                 Multiply_And_Send( data.v1, data.v2 );
 
-                 /* MEGN540 -- LAB 2 */ command_processed = true;
+                // /* MEGN540 -- LAB 2 */
+                command_processed = true;
             }
             break;
         case '/':
             if( USB_Msg_Length() >= _Message_Length( '/' ) ) {
                 // then process your divide...
-                // remove first character /
                 USB_Msg_Get();
 
-                struct __attribute__((__packed__)){
+                struct __attribute__( ( __packed__ ) ) {
                     float v1;
                     float v2;
                 } data;
-                
-                USB_Msg_Read_Into( &data, sizeof(data));
 
-                Divide_And_Send(data.v1, data.v2);
-                
+                USB_Msg_Read_Into( &data, sizeof( data ) );
 
-                 /* MEGN540 -- LAB 2 */ command_processed = true;
+                Divide_And_Send( data.v1, data.v2 );
+                // /* MEGN540 -- LAB 2 */ 
+                command_processed = true;
             }
             break;
         case '+':
@@ -127,15 +113,17 @@ void Task_Message_Handling( float _time_since_last )
                 // then process your plus...
                 USB_Msg_Get();
 
-                struct __attribute__((__packed__)){
+                struct __attribute__( ( __packed__ ) ) {
                     float v1;
                     float v2;
                 } data;
 
-                USB_Msg_Read_Into(& data, sizeof(data));
-                Add_And_Send(data.v1, data.v2);
+                USB_Msg_Read_Into( &data, sizeof( data ) );
 
-                 /* MEGN540 -- LAB 2 */ command_processed = true;
+                Add_And_Send( data.v1, data.v2 );
+
+                // /* MEGN540 -- LAB 2 */
+                command_processed = true;
             }
             break;
         case '-':
@@ -143,141 +131,223 @@ void Task_Message_Handling( float _time_since_last )
                 // then process your minus...
                 USB_Msg_Get();
 
-                struct __attribute__((__packed__)){
+                struct __attribute__( ( __packed__ ) ) {
                     float v1;
                     float v2;
                 } data;
 
-                USB_Msg_Read_Into(& data, sizeof(data));
-                Subtract_And_Send(data.v1, data.v2);
+                USB_Msg_Read_Into( &data, sizeof( data ) );
 
+                Subtract_And_Send( data.v1, data.v2 );
 
-
-                 /* MEGN540 -- LAB 2 */ command_processed = true;
+                // /* MEGN540 -- LAB 2 */
+                command_processed = true;
             }
             break;
         case '~':
             if( USB_Msg_Length() >= _Message_Length( '~' ) ) {
                 // then process your reset by setting the task_restart flag defined in Lab1_Tasks.h
+                //Task_Run_If_Ready( &task_restart );
                 USB_Msg_Get();
                 Task_Activate(&task_restart, -1);
-                USB_Send_Msg("c",'0',NULL,0);
-                 /* MEGN540 -- LAB 2 */ command_processed = true;
+                // /* MEGN540 -- LAB 2 */
+                command_processed = true;
             }
             break;
-        // LAB 2 CASES: ----------------------------------------------------------------------------
-        
-        // I have no idea if this was the right way to do this -JW
-        case 't':
-            if( USB_Msg_Length() >= _Message_Length( 't' ) ) {
-                // then process your divide...
-                // remove first character /
+        case 't': {
+            //one shot request
+            if(USB_Msg_Length() >= _Message_Length( 't' ) ) {
                 USB_Msg_Get();
-
-                // Get the number character: 0 - Time Now; 1 - Time of loop iteration
-                //---------->>>
-                
-                // THE GIST:
-                // Return time right now plus input char request. SO, could be the 0x00 -> give the time now again...
-                // OR 0x01 -> give the time that the last loop took via having a task track the looping time.
-                struct __attribute__((__packed__)){
-                    char request; 
-                } data; 
-
-                // Send current time by default
-                Send_Time_Now(0.0);
-                
-                USB_Msg_Read_Into( &data, sizeof(data));
-
-                if (data.request == 0x00) {
-                    Send_Time_Now(0.0);
+                struct __attribute__( ( __packed__ ) ) {
+                    uint8_t type;
+                } data;
+                USB_Msg_Read_Into( &data, sizeof( data ) );
+                switch( data.type ) {
+                    case 0x00:
+                        Task_Activate( &task_send_time, -1 );
+                        break;
+                    case 0x01:
+                        Task_Activate( &task_time_loop, -1 );
+                        break;
+                    default:
+                        break;
                 }
-                // Else if loop given
-                else if (data.request == 0x01) {
-                    Send_Loop_Time(_time_since_last);
-                    // DUE to the way task func pointer is called in task_management.c, _time_since_last contains the time elapsed since msgHandling ran last
-                }
-
-                //Fetch_and_Send_little_t(data.request == 0x00, data.request == 0x01); 
-
-                //Dont use this function... Fetch_and_Send_little_t(data.v1, data.v2); There already funcs defined in the Lab2-Tasks.h file.
-                
-                
-                 /* MEGN540 -- LAB 2 */ command_processed = true;
-                
+                command_processed = true;
             }
-            break;
-
-        case 'T':
+        }break;
+        case 'T': {
+            //periodic and cancel
+            //c c f
+            //cmd + type + float period(ms)
             if( USB_Msg_Length() >= _Message_Length( 'T' ) ) {
-                // then process your divide...
-                // remove first character /
                 USB_Msg_Get();
-
-                // Get the number character: 0 - Time Now; 1 - Time of loop iteration
-                //---------->>>
-                struct __attribute__((__packed__)){
-                    char request; 
-                    float interval; 
-                } data;                
-                
-                // THE GIST:
-                // Basically everything little t did plus the time of every X milliseconnds using another task that will activate every pass through the loop
-                //      Maybe turn the repetition task on and off as necessary.
-                // Return time right now plus input char request. SO, could be the 0x00 -> give the time now again...
-                // OR 0x01 -> give the time that the last loop took via having a task track the looping time.
-
-                // For the X ms thing (big T functionality) Im thinking we make a task that we activate to control this. Activate it with a "interval" run_period. This task will be
-                // in the main loop and will only "task_run_if_ready" so it only runs if the run_period = interval, is reached.
-
-                // Send current time by default
-                Send_Time_Now(0.0);
-                
-                USB_Msg_Read_Into( &data, sizeof(data));
-                // If just send time now.
-                if (data.request == 0x00) {
-                    Send_Time_Now(0.0);
+                struct __attribute__( ( __packed__ ) ) {
+                    uint8_t type;
+                    float period_ms;
+                } data;
+                USB_Msg_Read_Into( &data, sizeof( data ) );
+                float period_s = data.period_ms / 1000.0f;
+                switch(data.type) {
+                    case 0x00:
+                        if(data.period_ms <= 0) {
+                            Task_Cancel( &task_send_time );
+                        }else {
+                            Task_Activate( &task_send_time, period_s );
+                        }
+                        break;
+                    case 0x01:
+                        if(data.period_ms <= 0) {
+                            Task_Cancel( &task_time_loop );
+                        }else {
+                            Task_Activate( &task_time_loop, period_s );
+                        }
+                        break;
+                    default:
+                        break;
                 }
-                // Else if loop given
-                else if (data.request == 0x01) {
-                    Send_Loop_Time(_time_since_last);
-                    // DUE to the way task func pointer is called in task_management.c, _time_since_last contains the time elapsed since msgHandling ran last
-                }
-
-                // Big T funcitnality:
-                // IF non-zero interval >> Run the task so it repeats every interval milisecs
-                if (data.interval > 0) {
-                    Task_Activate(&task_send_time, data.interval);
-                }
-                // ELSE data.interval <= 0 so request is cancelled.
-                else {
-                    Task_Cancel(&task_send_time);
-                }
-
-                
-
-                //Fetch_and_Send_big_T(data.request == 0x00, data.request == 0x01, data.interval); 
-
-                //Dont use this function... Fetch_and_Send_big_T(data.v1, data.v2); There already funcs defined in the Lab2-Tasks.h file.
-                
-
-                 /* MEGN540 -- LAB 2 */ command_processed = true;
-                
+                command_processed = true;
             }
-            break;
+        }break;
+        case 'e': {
+            //one time
+            if( USB_Msg_Length() >= _Message_Length( 'e' ) ) {
+                USB_Msg_Get();
+                Task_Activate(&task_send_encoder_now, -1);          
+                command_processed = true;
+            }
+        }break;
+        case 'E': {
+            //periodic and cancel
+            //c c f
+            //cmd + type + float period(ms)
+            if( USB_Msg_Length() >= _Message_Length( 'E' ) ) {
+                USB_Msg_Get();
+                struct __attribute__( ( __packed__ ) ) {
+                    float period_ms;
+                } data;
+                USB_Msg_Read_Into( &data, sizeof( data ) );
+                float period_s = data.period_ms / 1000.0f;
+                if( data.period_ms <= 0){
+                    Task_Cancel(&task_send_encoder_loop);
+                }else{
+                    Task_Activate(&task_send_encoder_loop, period_s);
+                }
+                command_processed = true;
+            }
+        }break;
+        case 'b': {
+            //one time
+            if( USB_Msg_Length() >= _Message_Length( 'b' ) ) {
+                USB_Msg_Get();
+                Task_Activate(&task_send_battery_now, -1);
+                command_processed = true;
+            }
+        }break;
+        case 'B': {
+            //periodic and cancel
+            //c c f
+            //cmd + type + float period(ms)
+            if( USB_Msg_Length() >= _Message_Length( 'B' ) ) {
+                USB_Msg_Get();
+                struct __attribute__( ( __packed__ ) ) {
+                    float period_ms;
+                } data;
+                USB_Msg_Read_Into( &data, sizeof( data ) );
+                float period_s = data.period_ms / 1000.0f;
+                if( data.period_ms <= 0){
+                    Task_Cancel(&task_send_battery_loop);
+                }else{
+                    Task_Activate(&task_send_battery_loop, period_s);
+                }
+                command_processed = true;
+            }
+        }break; 
+        case 'p': {
+            if( USB_Msg_Length() >= _Message_Length( 'p' ) ) {
+                USB_Msg_Get();
+                struct __attribute__( ( __packed__ ) ) {
+                    int16_t pwm_left;
+                    int16_t pwm_right;
+                } data;
+                USB_Msg_Read_Into( &data, sizeof( data ) );
+                Set_PWM(data.pwm_left, data.pwm_right);
+                command_processed = true;
+            }
+        }break; 
+        case 'P': {
+            if( USB_Msg_Length() >= _Message_Length( 'P' ) ) {
+                USB_Msg_Get();
+                struct __attribute__( ( __packed__ ) ) {
+                    int16_t pwm_left;
+                    int16_t pwm_right;
+                    float period_ms;
+                } data;
+                USB_Msg_Read_Into( &data, sizeof( data ) );
+                if( data.period_ms <= 0){
+                    Task_Cancel(&task_stop_pwm);
+                }else{
+                    Set_PWM(data.pwm_left, data.pwm_right);
+                    Task_Activate(&task_stop_pwm, data.period_ms / 1000.0f);
+                }
+                command_processed = true;
+            }
+        }break; 
+        case 's': {
+            if( USB_Msg_Length() >= _Message_Length( 's' ) ) {
+                USB_Msg_Get();
+                Stop_PWM(0.0f);
+                command_processed = true;
+            }
+        }break; 
+        case 'S': {
+            if( USB_Msg_Length() >= _Message_Length( 'S' ) ) {
+                USB_Msg_Get();
+                Stop_PWM(0.0f);
+                command_processed = true;
+            }
+        }break; 
+        case 'q': {
+            if( USB_Msg_Length() >= _Message_Length( 'q' ) ) {
+                USB_Msg_Get();
+                Send_PWM_ID(0.0f);
+                command_processed = true;
+            }
+        }break; 
+        case 'Q': {
+            if( USB_Msg_Length() >= _Message_Length( 'Q' ) ) {
+                USB_Msg_Get();
+                struct __attribute__( ( __packed__ ) ) {
+                    float period_ms;
+                } data;
+                USB_Msg_Read_Into( &data, sizeof( data ) );
+                if( data.period_ms <= 0){
+                    Task_Cancel(&task_send_pwm_id_loop);
+                }else{
+                    Task_Activate(&task_send_pwm_id_loop, data.period_ms / 1000.0f);
+                }
+                command_processed = true;
+            }
+        }break; 
         default:
+        {
             // What to do if you dont recognize the command character
             USB_Msg_Get();
-            USB_Send_Msg("c",'?',NULL,0);
-            USB_Flush_Input_Buffer();
-            break;
+             if( command != '\0' && command != '\n' && command != '\r' ) {
+                 USB_Send_Msg( "cc", command, "?", 1 );
+             }
+             USB_Flush_Input_Buffer();
+             break;
+        }
     }
 
     //********* MEGN540 -- LAB 2 ************//
-    if( command_processed ) {
-        // RESET the WATCHDOG TIMER
-        Task_Activate( &task_message_handling_watchdog, 0.1 );
+     if( command_processed ) {
+    Task_Activate( &task_message_handling_watchdog, 0.5 );
+} else if( USB_Msg_Length() > 0 ) {
+    if( !task_message_handling_watchdog.is_active ) {
+        Task_Activate( &task_message_handling_watchdog, 0.5 );
     }
+}
 }
 
 /**

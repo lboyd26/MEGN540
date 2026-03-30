@@ -36,15 +36,21 @@
 #define LAB4_TASKS_H
 
 #include "Task_Management.h"
-
-// Include your lab-specific headers here
-// e.g. #include "SerialIO.h"  // necessary for sending arithmatic results back to user
+#include "SerialIO.h"
+#include "Timing.h"
+#include "Encoder.h"
+#include "MotorPWM.h"
+#include "Filter.h"
 
 // Put your lab-specific tasks here
 // e.g. Task_t task_restart;  ///<-- Lab 1: This flag indicates that the device received a restart command from the hoast. Default inactive.
 
-// Put your lab-specific task functionality and data_structures (if necessary) here so it is accessable to both
-// message handeling and the Lab main loops.
-// e.g. void Send_Time_Now( float _time_since_last );
+Task_t task_stop_pwm;
+Task_t task_send_pwm_id_loop;
+
+void Set_PWM(int16_t pwm_left, int16_t pwm_right);
+void Stop_PWM(float _time_since_last);
+void Send_PWM_ID(float _time_since_last);
+void Send_PWM_ID_Loop(float _time_since_last);
 
 #endif  // ifndef LAB4_TASKS_H

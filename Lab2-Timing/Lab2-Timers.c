@@ -63,12 +63,14 @@ void Initialize_Modules( float _time_not_used_ )
     // Setup task handling
     Initialize_Task( &task_restart, Initialize_Modules /*function pointer to call*/ );
 
-    Initialize_Task(&task_time_loop, Send_Loop_Time); 
-    Initialize_Task(&task_send_time, Send_Time_Now);    
-
     // Setup message handling to get processed at some desired rate.
-    Initialize_Task( &task_message_handling, Task_Message_Handling, 0 );
-    Initialize_Task( &task_message_handling_watchdog, 0.1 );
+    Initialize_Task( &task_message_handling, Task_Message_Handling );
+
+    // Initialize_Task( &task_message_handling_watchdog, /*watchdog timout period*/,  Task_Message_Handling_Watchdog );
+    Initialize_Task(&task_message_handling_watchdog, Task_Message_Handling_Watchdog);
+    Initialize_Task(&task_time_loop, Send_Loop_Time);
+    Initialize_Task(&task_send_time, Send_Time_Now);
+    Task_Activate(&task_message_handling, 0);
 }
 
 /** Main program entry point. This routine configures the hardware required by the application, then
@@ -81,15 +83,12 @@ int main( void )
 
     for( ;; ) {  // yet another way to do while (true)
         Task_USB_Upkeep();
-        // New task that tracks how long since last loop cyclce so since last time that task ran
-        // Repeptiton also, so 2 tasks.
-
 
         Task_Run_If_Ready( &task_message_handling );
-        Task_Run_If_Ready(&task_send_time);
         Task_Run_If_Ready( &task_restart );
 
-        // Use this watchdog as the 100 ms no answer-buffer flush thing from the lab PDF
         Task_Run_If_Ready( &task_message_handling_watchdog );
+        Task_Run_If_Ready( &task_time_loop );
+        Task_Run_If_Ready( &task_send_time );
     }
 }

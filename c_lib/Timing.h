@@ -59,7 +59,7 @@ void Initialize_Timing( );
  * things on second or millisecond resolution.
  * @return
  */
-uint16_t Timing_Get_Milli();
+uint32_t Timing_Get_Milli();
 uint16_t Timing_Get_Micro();
 
 /**

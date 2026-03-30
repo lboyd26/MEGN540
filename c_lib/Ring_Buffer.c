@@ -184,7 +184,7 @@ uint8_t rb_pop_front_B( Ring_Buffer_Byte_t* p_buf )
     if( p_buf->end_index == p_buf->start_index ) {
         return 0;
     } else {
-        uint8_t return_value = p_buf->buffer[p_buf->start_index];
+        float return_value = p_buf->buffer[p_buf->start_index];
         p_buf->start_index++;
         p_buf->start_index &= RB_MASK_B;
         return return_value;
