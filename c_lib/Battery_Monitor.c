@@ -1,6 +1,6 @@
 #include "Battery_Monitor.h"
 
-static const float BITS_TO_BATTERY_VOLTS = 0.0f;
+static const float BITS_TO_BATTERY_VOLTS = 0.005f;
 
 /**
  * Function Initialize_Battery_Monitor initializes the Battery Monitor to record the current battery voltages.
@@ -26,6 +26,7 @@ float Battery_Voltage()
     } data = { .value = 0 };
 
     // *** MEGN540 LAB3 YOUR CODE HERE ***
+
 
     return data.value * BITS_TO_BATTERY_VOLTS;
 }

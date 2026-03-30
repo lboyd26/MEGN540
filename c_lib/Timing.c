@@ -54,7 +54,25 @@ void Initialize_Timing()
     // YOUR CODE HERE
     // Enable timing, setup prescalers, etc.
 
+    cli();
+
     _count_ms = 0;
+
+    // Set CTC mode
+    TCCR0A = (1 << WGM1);
+
+    //
+    TCCR0B = 0;
+
+    // 249 b/c 16MHz/64 = 250kHz -> 1000/4us = 250 -> 249 for base 0 system
+    OCR0A = 249;
+
+    TIMSK0 = (1 << OCIE0A);
+    
+    // Start timer w/ prescaler=64
+    TCCR0B |= (1 << CS01) | (1 << CS00);
+
+    sei();
 }
 
 /**
@@ -65,7 +83,10 @@ float Timing_Get_Time_Sec()
 {
     // *** MEGN540 Lab 2 ***
     // YOUR CODE HERE
-    return 0;
+    Time_t time = Timing_Get_Time();
+
+    time_sec = (float)time.millisec/1000 + (float)time.microsec/1000000;
+    return time_sec;
 }
 Time_t Timing_Get_Time()
 {
@@ -73,7 +94,7 @@ Time_t Timing_Get_Time()
     // YOUR CODE HERE
     Time_t time = {
         .millisec = _count_ms,
-        .microsec = 0  // YOU NEED TO REPLACE THIS WITH A CALL TO THE TIMER0 REGISTER AND MULTIPLY APPROPRIATELY
+        .microsec = TCNT0 * 4  // YOU NEED TO REPLACE THIS WITH A CALL TO THE TIMER0 REGISTER AND MULTIPLY APPROPRIATELY
     };
 
     return time;
@@ -86,13 +107,21 @@ Time_t Timing_Get_Time()
  */
 uint32_t Timing_Get_Milli()
 {
+    /**
+    Time_t time = Timing_Get_Time();
+
+    time_milli = t.millisec;
+    return time_milli; */
     return _count_ms;
 }
 uint16_t Timing_Get_Micro()
 {
     // *** MEGN540 Lab 2 ***
     // YOUR CODE HERE
-    return 0;  // YOU NEED TO REPLACE THIS WITH A CALL TO THE TIMER0 REGISTER AND MULTIPLY APPROPRIATELY
+    Time_t time = Timing_Get_Time();
+
+    time_micro = t.microsec;
+    return time_micro;  // YOU NEED TO REPLACE THIS WITH A CALL TO THE TIMER0 REGISTER AND MULTIPLY APPROPRIATELY
 }
 
 /**
@@ -104,7 +133,13 @@ float Timing_Seconds_Since( const Time_t* time_start_p )
 {
     // *** MEGN540 Lab 2 ***
     // YOUR CODE HERE
-    float delta_time = 0;
+
+    Time_t time = Timing_Get_Time();
+
+    now = (float)time.millisec/1000 + (float)time.microsec/1000000;
+    then = (float)time_start_p->millisec/1000 + (float)time_start_p->microsec/1000000;
+
+    float delta_time = now-then;
     return delta_time;
 }
 

@@ -58,7 +58,8 @@ void Task_Message_Handling( float _time_since_last )
     // bytes yet, the command persists
     char command = USB_Msg_Peek();
 
-    // /* MEGN540 -- LAB 2 */ bool command_processed = false;
+    // /* MEGN540 -- LAB 2 */
+    bool command_processed = false;
 
     // process command
     switch( command ) {
@@ -86,47 +87,267 @@ void Task_Message_Handling( float _time_since_last )
                 // Call MEGN540_Lab_Task Function
                 Multiply_And_Send( data.v1, data.v2 );
 
-                // /* MEGN540 -- LAB 2 */ command_processed = true;
+                // /* MEGN540 -- LAB 2 */
+                command_processed = true;
             }
             break;
         case '/':
             if( USB_Msg_Length() >= _Message_Length( '/' ) ) {
                 // then process your divide...
+                USB_Msg_Get();
 
-                // /* MEGN540 -- LAB 2 */ command_processed = true;
+                struct __attribute__( ( __packed__ ) ) {
+                    float v1;
+                    float v2;
+                } data;
+
+                USB_Msg_Read_Into( &data, sizeof( data ) );
+
+                Divide_And_Send( data.v1, data.v2 );
+                // /* MEGN540 -- LAB 2 */ 
+                command_processed = true;
             }
             break;
         case '+':
             if( USB_Msg_Length() >= _Message_Length( '+' ) ) {
                 // then process your plus...
+                USB_Msg_Get();
 
-                // /* MEGN540 -- LAB 2 */ command_processed = true;
+                struct __attribute__( ( __packed__ ) ) {
+                    float v1;
+                    float v2;
+                } data;
+
+                USB_Msg_Read_Into( &data, sizeof( data ) );
+
+                Add_And_Send( data.v1, data.v2 );
+
+                // /* MEGN540 -- LAB 2 */
+                command_processed = true;
             }
             break;
         case '-':
             if( USB_Msg_Length() >= _Message_Length( '-' ) ) {
                 // then process your minus...
+                USB_Msg_Get();
 
-                // /* MEGN540 -- LAB 2 */ command_processed = true;
+                struct __attribute__( ( __packed__ ) ) {
+                    float v1;
+                    float v2;
+                } data;
+
+                USB_Msg_Read_Into( &data, sizeof( data ) );
+
+                Subtract_And_Send( data.v1, data.v2 );
+
+                // /* MEGN540 -- LAB 2 */
+                command_processed = true;
             }
             break;
         case '~':
             if( USB_Msg_Length() >= _Message_Length( '~' ) ) {
                 // then process your reset by setting the task_restart flag defined in Lab1_Tasks.h
-
-                // /* MEGN540 -- LAB 2 */ command_processed = true;
+                //Task_Run_If_Ready( &task_restart );
+                USB_Msg_Get();
+                Task_Activate(&task_restart, -1);
+                // /* MEGN540 -- LAB 2 */
+                command_processed = true;
             }
             break;
+        case 't': {
+            //one shot request
+            if(USB_Msg_Length() >= _Message_Length( 't' ) ) {
+                USB_Msg_Get();
+                struct __attribute__( ( __packed__ ) ) {
+                    uint8_t type;
+                } data;
+                USB_Msg_Read_Into( &data, sizeof( data ) );
+                switch( data.type ) {
+                    case 0x00:
+                        Task_Activate( &task_send_time, -1 );
+                        break;
+                    case 0x01:
+                        Task_Activate( &task_time_loop, -1 );
+                        break;
+                    default:
+                        break;
+                }
+                command_processed = true;
+            }
+        }break;
+        case 'T': {
+            //periodic and cancel
+            //c c f
+            //cmd + type + float period(ms)
+            if( USB_Msg_Length() >= _Message_Length( 'T' ) ) {
+                USB_Msg_Get();
+                struct __attribute__( ( __packed__ ) ) {
+                    uint8_t type;
+                    float period_ms;
+                } data;
+                USB_Msg_Read_Into( &data, sizeof( data ) );
+                float period_s = data.period_ms / 1000.0f;
+                switch(data.type) {
+                    case 0x00:
+                        if(data.period_ms <= 0) {
+                            Task_Cancel( &task_send_time );
+                        }else {
+                            Task_Activate( &task_send_time, period_s );
+                        }
+                        break;
+                    case 0x01:
+                        if(data.period_ms <= 0) {
+                            Task_Cancel( &task_time_loop );
+                        }else {
+                            Task_Activate( &task_time_loop, period_s );
+                        }
+                        break;
+                    default:
+                        break;
+                }
+                command_processed = true;
+            }
+        }break;
+        case 'e': {
+            //one time
+            if( USB_Msg_Length() >= _Message_Length( 'e' ) ) {
+                USB_Msg_Get();
+                Task_Activate(&task_send_encoder_now, -1);          
+                command_processed = true;
+            }
+        }break;
+        case 'E': {
+            //periodic and cancel
+            //c c f
+            //cmd + type + float period(ms)
+            if( USB_Msg_Length() >= _Message_Length( 'E' ) ) {
+                USB_Msg_Get();
+                struct __attribute__( ( __packed__ ) ) {
+                    float period_ms;
+                } data;
+                USB_Msg_Read_Into( &data, sizeof( data ) );
+                float period_s = data.period_ms / 1000.0f;
+                if( data.period_ms <= 0){
+                    Task_Cancel(&task_send_encoder_loop);
+                }else{
+                    Task_Activate(&task_send_encoder_loop, period_s);
+                }
+                command_processed = true;
+            }
+        }break;
+        case 'b': {
+            //one time
+            if( USB_Msg_Length() >= _Message_Length( 'b' ) ) {
+                USB_Msg_Get();
+                Task_Activate(&task_send_battery_now, -1);
+                command_processed = true;
+            }
+        }break;
+        case 'B': {
+            //periodic and cancel
+            //c c f
+            //cmd + type + float period(ms)
+            if( USB_Msg_Length() >= _Message_Length( 'B' ) ) {
+                USB_Msg_Get();
+                struct __attribute__( ( __packed__ ) ) {
+                    float period_ms;
+                } data;
+                USB_Msg_Read_Into( &data, sizeof( data ) );
+                float period_s = data.period_ms / 1000.0f;
+                if( data.period_ms <= 0){
+                    Task_Cancel(&task_send_battery_loop);
+                }else{
+                    Task_Activate(&task_send_battery_loop, period_s);
+                }
+                command_processed = true;
+            }
+        }break; 
+        case 'p': {
+            if( USB_Msg_Length() >= _Message_Length( 'p' ) ) {
+                USB_Msg_Get();
+                struct __attribute__( ( __packed__ ) ) {
+                    int16_t pwm_left;
+                    int16_t pwm_right;
+                } data;
+                USB_Msg_Read_Into( &data, sizeof( data ) );
+                Set_PWM(data.pwm_left, data.pwm_right);
+                command_processed = true;
+            }
+        }break; 
+        case 'P': {
+            if( USB_Msg_Length() >= _Message_Length( 'P' ) ) {
+                USB_Msg_Get();
+                struct __attribute__( ( __packed__ ) ) {
+                    int16_t pwm_left;
+                    int16_t pwm_right;
+                    float period_ms;
+                } data;
+                USB_Msg_Read_Into( &data, sizeof( data ) );
+                if( data.period_ms <= 0){
+                    Task_Cancel(&task_stop_pwm);
+                }else{
+                    Set_PWM(data.pwm_left, data.pwm_right);
+                    Task_Activate(&task_stop_pwm, data.period_ms / 1000.0f);
+                }
+                command_processed = true;
+            }
+        }break; 
+        case 's': {
+            if( USB_Msg_Length() >= _Message_Length( 's' ) ) {
+                USB_Msg_Get();
+                Stop_PWM(0.0f);
+                command_processed = true;
+            }
+        }break; 
+        case 'S': {
+            if( USB_Msg_Length() >= _Message_Length( 'S' ) ) {
+                USB_Msg_Get();
+                Stop_PWM(0.0f);
+                command_processed = true;
+            }
+        }break; 
+        case 'q': {
+            if( USB_Msg_Length() >= _Message_Length( 'q' ) ) {
+                USB_Msg_Get();
+                Send_PWM_ID(0.0f);
+                command_processed = true;
+            }
+        }break; 
+        case 'Q': {
+            if( USB_Msg_Length() >= _Message_Length( 'Q' ) ) {
+                USB_Msg_Get();
+                struct __attribute__( ( __packed__ ) ) {
+                    float period_ms;
+                } data;
+                USB_Msg_Read_Into( &data, sizeof( data ) );
+                if( data.period_ms <= 0){
+                    Task_Cancel(&task_send_pwm_id_loop);
+                }else{
+                    Task_Activate(&task_send_pwm_id_loop, data.period_ms / 1000.0f);
+                }
+                command_processed = true;
+            }
+        }break; 
         default:
+        {
             // What to do if you dont recognize the command character
-            break;
+            USB_Msg_Get();
+             if( command != '\0' && command != '\n' && command != '\r' ) {
+                 USB_Send_Msg( "cc", command, "?", 1 );
+             }
+             USB_Flush_Input_Buffer();
+             break;
+        }
     }
 
     //********* MEGN540 -- LAB 2 ************//
-    // if( command_processed ) {
-    //     // RESET the WATCHDOG TIMER
-    //     Task_Activate( &task_message_handling_watchdog );
-    // }
+     if( command_processed ) {
+    Task_Activate( &task_message_handling_watchdog, 0.5 );
+} else if( USB_Msg_Length() > 0 ) {
+    if( !task_message_handling_watchdog.is_active ) {
+        Task_Activate( &task_message_handling_watchdog, 0.5 );
+    }
+}
 }
 
 /**
