@@ -1,14 +1,29 @@
 #include "Battery_Monitor.h"
 
-static const float BITS_TO_BATTERY_VOLTS = 0.005f;
+// Battery voltage is divided by 2 before ADC6.
+// ADC is 10-bit (0-1023), AVCC reference = 5V.
+// Actual battery voltage = ADC_value * (AVCC / 1024) * 2
+static const float BITS_TO_BATTERY_VOLTS = 2.0f * 5.0f / 1023.0f;
 
 /**
  * Function Initialize_Battery_Monitor initializes the Battery Monitor to record the current battery voltages.
+ * Configures the ADC for single-ended reading on ADC6 (PF6) with AVCC reference and prescaler of 128.
+ * At 16MHz: 16MHz / 128 = 125kHz ADC clock (within the required 50-200kHz range per datasheet sec. 24.4).
  */
 void Initialize_Battery_Monitor()
 {
+    DDRF  &= ~( 1 << DDF6 );
+    PORTF &= ~( 1 << PORTF6 );
 
-    // *** MEGN540 LAB3 YOUR CODE HERE ***
+    DIDR0 |= ( 1 << ADC6D );
+
+    ADMUX = ( 1 << REFS0 ) | ( 6 & 0x0F );
+    ADCSRB &= ~( 1 << MUX5 );
+
+    ADCSRA = ( 1 << ADEN ) | ( 1 << ADPS2 ) | ( 1 << ADPS1 ) | ( 1 << ADPS0 );
+
+    ADCSRA |= ( 1 << ADSC );
+    while( ADCSRA & ( 1 << ADSC ) );
 }
 
 /**
@@ -25,7 +40,12 @@ float Battery_Voltage()
         uint16_t value;
     } data = { .value = 0 };
 
-    // *** MEGN540 LAB3 YOUR CODE HERE ***
+    ADCSRA |= ( 1 << ADSC );
+
+    while( ADCSRA & ( 1 << ADSC ) );
+
+    data.split.LSB = ADCL;
+    data.split.MSB = ADCH;
 
 
     return data.value * BITS_TO_BATTERY_VOLTS;

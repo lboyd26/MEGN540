@@ -53,6 +53,12 @@ void Initialize_Timing()
     // *** MEGN540 Lab 2 ***
     // YOUR CODE HERE
     // Enable timing, setup prescalers, etc.
+    TCCR0A = (1 << WGM01);
+    TCCR0B |= (1 << CS01) | (1 << CS00);
+    // 0-249 -> 250 * 4 = 1000us = 1ms
+    OCR0A = 249;
+    TIMSK0 |= (1 << OCIE0A);
+    sei();
 
     cli();
 
@@ -83,19 +89,22 @@ float Timing_Get_Time_Sec()
 {
     // *** MEGN540 Lab 2 ***
     // YOUR CODE HERE
-    Time_t time = Timing_Get_Time();
+    cli();
+    uint32_t time = _count_ms;
+    sei();
 
-    time_sec = (float)time.millisec/1000 + (float)time.microsec/1000000;
-    return time_sec;
+    return time / 1000.0;
 }
 Time_t Timing_Get_Time()
 {
     // *** MEGN540 Lab 2 ***
     // YOUR CODE HERE
+    cli();
     Time_t time = {
         .millisec = _count_ms,
         .microsec = TCNT0 * 4  // YOU NEED TO REPLACE THIS WITH A CALL TO THE TIMER0 REGISTER AND MULTIPLY APPROPRIATELY
     };
+    sei();
 
     return time;
 }
@@ -107,21 +116,21 @@ Time_t Timing_Get_Time()
  */
 uint32_t Timing_Get_Milli()
 {
-    /**
-    Time_t time = Timing_Get_Time();
-
-    time_milli = t.millisec;
-    return time_milli; */
-    return _count_ms;
+    uint32_t milli;
+    cli();
+    milli = _count_ms;
+    sei();
+    return milli;
 }
 uint16_t Timing_Get_Micro()
 {
     // *** MEGN540 Lab 2 ***
     // YOUR CODE HERE
-    Time_t time = Timing_Get_Time();
-
-    time_micro = t.microsec;
-    return time_micro;  // YOU NEED TO REPLACE THIS WITH A CALL TO THE TIMER0 REGISTER AND MULTIPLY APPROPRIATELY
+    uint8_t treg;
+    cli();
+    treg = TCNT0;
+    sei();
+    return (uint16_t)treg * 4;  // YOU NEED TO REPLACE THIS WITH A CALL TO THE TIMER0 REGISTER AND MULTIPLY APPROPRIATELY
 }
 
 /**
@@ -133,26 +142,29 @@ float Timing_Seconds_Since( const Time_t* time_start_p )
 {
     // *** MEGN540 Lab 2 ***
     // YOUR CODE HERE
-
     Time_t time = Timing_Get_Time();
+    int32_t delta_milli = (int32_t)time.millisec - (int32_t)time_start_p->millisec;
+    int32_t delta_micro = (int32_t)time.microsec - (int32_t)time_start_p->microsec;
+    if(delta_micro < 0) {
+        delta_micro += 1000;
+        delta_milli -= 1;
+    }
 
-    now = (float)time.millisec/1000 + (float)time.microsec/1000000;
-    then = (float)time_start_p->millisec/1000 + (float)time_start_p->microsec/1000000;
-
-    float delta_time = now-then;
-    return delta_time;
+    return (delta_milli / 1000.0f) + (delta_micro / 1000000.0f);
 }
 
 /** This is the Interrupt Service Routine for the Timer0 Compare A feature.
  * You'll need to set the compare flags properly for it to work.
  */
-/*ISR( DEFINE THE COMPARISON TRIGGER )
+ISR( TIMER0_COMPA_vect )
 {
     // *** MEGN540 Lab 2 ***
     // YOUR CODE HERE
     // YOU NEED TO RESET THE Timer0 Value to 0 again!
 
+    //TCNT0 = 0;
+
     // take care of upticks of both our internal and external variables.
     _count_ms ++;
 
-}*/
+}

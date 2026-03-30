@@ -62,7 +62,12 @@ void Initialize_Encoders()
     // You'll use the INT6_vect ISR flag.
 
     // Initialize static file variables. These probably need to be updated.
-    cli();
+
+    EIMSK &= ~(1 << INT6); //clear EIMSK INT 6
+    EICRB &= ~(1 << ISC61); // clear EICRB ICS61
+    EICRB |= (1 << ISC60); // set EICRB ISC60
+
+   
 
     DDRB &= ~(1<<4); // Left XOR
 
@@ -71,12 +76,21 @@ void Initialize_Encoders()
 
     DDRF &= ~(1<<0); // Right Channel B
 
+
+    PORTE |= (1 << PE2) | (1 << PE6); 
+    PORTB |= (1 << PB4);
+    PORTF |= (1 << PF0);
+
+    PCIFR |= (1 << PCIF0); // PCIFR TODO
     // Enable Interupts
     PCICR |= (1 << PCIE0);
     PCMSK0 |= (1 << PCINT4);
 
-    EICRB |= (1 << ISC60) | (1 << ISC61);
+    EIFR = 0; // clear EIFR
     EIMSK |= (1 << INT6);
+
+
+
 
     _last_right_B = Right_B();
     _last_right_A = _last_right_B ^ Right_XOR();
@@ -143,7 +157,7 @@ float Encoder_Rad_Left()
 {
     // *** MEGN540 Lab3 ***
     // YOUR CODE HERE.  How many counts per rotation???
-    int8_t counts_pre_rev = 12;
+    float counts_per_rev = 12.0f;
     float rad = ((float)Encoder_Counts_Left() / counts_per_rev) * (2.0f * M_PI);
     return rad;
 }
@@ -156,7 +170,7 @@ float Encoder_Rad_Right()
 {
     // *** MEGN540 Lab3 ***
     // YOUR CODE HERE.  How many counts per rotation???
-    int8_t counts_pre_rev = 12;
+    float counts_per_rev = 12.0f;
     float rad = ((float)Encoder_Counts_Right() / counts_per_rev) * (2.0f * M_PI);
     return rad;
 }
@@ -168,14 +182,17 @@ float Encoder_Rad_Right()
  */
 ISR(PCINT0_vect)
 {
-    bool A = Left_A();
-    bool B = Left_B();
+    if(Left_XOR() != _last_left_XOR) {
+        bool A = Left_A();
+        bool B = Left_B();
 
-    int8_t increment = (B != _last_left_B) ? ((B ^ A) ? 1 : -1) : 0;
-    _left_counts += increment;
+        int8_t increment = (B != _last_left_B) ? ((B ^ A) ? 1 : -1) : 0;
+        _left_counts += increment;
 
-    _last_left_B = B;
-    _last_left_A = B ^ Left_XOR();
+        _last_left_B = B;
+        _last_left_A = B ^ Left_XOR();
+        _last_left_XOR = Left_XOR();
+    }
 }
 
 /**

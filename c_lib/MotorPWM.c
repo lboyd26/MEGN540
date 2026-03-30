@@ -161,8 +161,12 @@ void MotorPWM_Set_Max( uint16_t MAX_PWM )
     OCR1A = 0;
     OCR1B = 0;
 
+<<<<<<< HEAD
     ICR1 = max_pwm;
 
     //MototPWM_Set_Left(left_pwm);
     //MototPWM_Set_Right(right_pwm);
+=======
+    ICR1 = MAX_PWM;
+>>>>>>> NorlenL/main
 }

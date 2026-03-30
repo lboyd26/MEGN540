@@ -65,12 +65,13 @@ void blink_morse_str( char* str, uint16_t dot_length_ms )
 int main()
 {
     initialize_LED();
-    const uint16_t dot_length_ms = 250;
+    const uint16_t dot_length_ms = 100;
 
     while( 1 ) {
         // blink message!
         blink_morse_str("Hello World! ", dot_length_ms);
         // Using your blink_morse_str function this would be called as:
         // blink_morse_str("SOS ", dot_length_ms);
+        blink_morse_str("Hello World!", dot_length_ms);
     }
 }

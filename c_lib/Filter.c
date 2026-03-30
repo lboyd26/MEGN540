@@ -1,33 +1,3 @@
-/*
-         MEGN540 Mechatronics Lab
-    Copyright (C) Andrew Petruska, 2023.
-       apetruska [at] mines [dot] edu
-          www.mechanical.mines.edu
-*/
-
-/*
-    Copyright (c) 2023 Andrew Petruska at Colorado School of Mines
-
-    Permission is hereby granted, free of charge, to any person obtaining a copy
-    of this software and associated documentation files (the "Software"), to deal
-    in the Software without restriction, including without limitation the rights
-    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-    copies of the Software, and to permit persons to whom the Software is
-    furnished to do so, subject to the following conditions:
-
-    The above copyright notice and this permission notice shall be included in all
-    copies or substantial portions of the Software.
-
-    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-    SOFTWARE.
-
-*/
-
 #include "Filter.h"
 
 /**
@@ -49,7 +19,17 @@
  */
 void Filter_Init( Filter_Data_t* p_filt, float* numerator_coeffs, float* denominator_coeffs, uint8_t order )
 {
-    return;
+    rb_initialize_F( &p_filt->numerator );
+    rb_initialize_F( &p_filt->denominator );
+    rb_initialize_F( &p_filt->in_list );
+    rb_initialize_F( &p_filt->out_list );
+
+    for( int i = 0; i <= order; i++ ) {
+        rb_push_back_F( &p_filt->numerator, numerator_coeffs[i] );
+        rb_push_back_F( &p_filt->denominator, denominator_coeffs[i] );
+        rb_push_back_F( &p_filt->in_list, 0 );
+        rb_push_back_F( &p_filt->out_list, 0 );
+    }
 }
 
 /**
@@ -60,7 +40,10 @@ void Filter_Init( Filter_Data_t* p_filt, float* numerator_coeffs, float* denomin
  */
 void Filter_ShiftBy( Filter_Data_t* p_filt, float shift_amount )
 {
-    return;
+    for( int i = 0; i < rb_length_F( &p_filt->in_list ); i++ ) {
+        rb_set_F( &p_filt->in_list, i, rb_get_F( &p_filt->in_list, i ) + shift_amount );
+        rb_set_F( &p_filt->out_list, i, rb_get_F( &p_filt->out_list, i ) + shift_amount );
+    }
 }
 
 /**
@@ -71,7 +54,10 @@ void Filter_ShiftBy( Filter_Data_t* p_filt, float shift_amount )
  */
 void Filter_SetTo( Filter_Data_t* p_filt, float amount )
 {
-    return;
+    for( int i = 0; i < rb_length_F( &p_filt->in_list ); i++ ) {
+        rb_set_F( &p_filt->in_list, i, amount );
+        rb_set_F( &p_filt->out_list, i, amount );
+    }
 }
 
 /**
@@ -82,14 +68,30 @@ void Filter_SetTo( Filter_Data_t* p_filt, float amount )
  */
 float Filter_Value( Filter_Data_t* p_filt, float value )
 {
-    return 0;
+    rb_push_front_F( &p_filt->in_list, value );
+
+    float numerator = 0.0f;
+    for( int i = 0; i < rb_length_F( &p_filt->numerator ); i++ ) {
+        numerator += rb_get_F( &p_filt->in_list, i ) * rb_get_F( &p_filt->numerator, i );
+    }
+
+    float denominator = 0.0f;
+    for( int i = 1; i < rb_length_F( &p_filt->numerator ); i++ ) {
+        denominator += rb_get_F( &p_filt->out_list, i - 1 ) * rb_get_F( &p_filt->denominator, i );
+    }
+
+    float total = ( numerator - denominator ) / rb_get_F( &p_filt->denominator, 0 );
+
+    rb_push_front_F( &p_filt->out_list, total );
+
+    return total;
 }
 
 /**
  * Function Filter_Last_Output returns the most up-to-date filtered value without updating the filter.
- * @return The latest filtered value
+ * @return The latest filtered valuebattery_filter
  */
 float Filter_Last_Output( Filter_Data_t* p_filt )
 {
-    return 0;
+    return rb_get_F( &p_filt->out_list, 0 );
 }
