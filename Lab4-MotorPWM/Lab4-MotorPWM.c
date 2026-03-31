@@ -28,6 +28,7 @@
 
 */
 
+// put your includes here for all modules you need to use
 #include "Lab1_Tasks.h"
 #include "Lab2_Tasks.h"
 #include "Lab3_Tasks.h"
@@ -42,14 +43,13 @@
 #include "Encoder.h"
 #include "MotorPWM.h"
 
+// put your initialization function here
 void Initialize_Modules( float _time_not_used_ )
 {
     // Initialize (reinitialize) all global variables
     
     float T = 0.002f;
     
-    //float T = 0.002; //period or measure every x seconds
-
     // reset USB input buffers
     USB_Flush_Input_Buffer();
 
@@ -59,8 +59,7 @@ void Initialize_Modules( float _time_not_used_ )
     Initialize_Encoders();
     Initialize_Battery_Monitor();
 
-    //tune this value
-    Initialize_MotorPWM(500);
+    Initialize_MotorPWM( 500 );
 
 
     // Setup task handling 
@@ -80,20 +79,20 @@ void Initialize_Modules( float _time_not_used_ )
     Initialize_Task(&task_send_encoder_now, Send_Encoder_Now);
     Initialize_Task(&task_send_encoder_loop, Send_Loop_Encoder);
     Initialize_Task(&task_send_battery_now, Send_Battery_Now);
-    Initialize_Task(&task_send_battery_loop, Send_Loop_Battery);  
+    Initialize_Task(&task_send_battery_loop, Send_Loop_Battery);
+  
 
     Initialize_Task(&task_battery_filter, Battery_Filter_Update);
     Task_Activate(&task_battery_filter, T);
 
-    // LAB 4 stuff
-    Initialize_Task(&task_stop_pwm, Stop_PWM);
-    Initialize_Task(&task_send_pwm_id_loop, Send_PWM_ID);
+
+    //LAB 4
+    Initialize_Task(&task_stop_pwm, Stop_PWM_Delay);
+    Initialize_Task(&task_send_pwm_id_loop, Send_PWM_ID_Loop);
+    //Initialize_Task(&task_schedule_pwm_stop, Schedule_PWM_Stop);
 }
 
 
-/** Main program entry point. This routine configures the hardware required by the application, then
- *  enters a loop to run the application tasks in sequence.
- */
 int main( void )
 {
 
@@ -118,8 +117,9 @@ int main( void )
         Task_Run_If_Ready( &task_send_battery_now );
         Task_Run_If_Ready( &task_send_battery_loop );
 
-        Task_Run_If_Ready(&task_stop_pwm);
-        Task_Run_If_Ready(&task_send_pwm_id_loop);
+        //Lab 4
+        Task_Run_If_Ready( &task_stop_pwm );
+        Task_Run_If_Ready( &task_send_pwm_id_loop );
 
 
 

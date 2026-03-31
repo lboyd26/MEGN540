@@ -53,32 +53,14 @@ void Initialize_Timing()
     // *** MEGN540 Lab 2 ***
     // YOUR CODE HERE
     // Enable timing, setup prescalers, etc.
-    TCCR0A |= (1 << WGM01);
+    TCCR0A = (1 << WGM01);
     TCCR0B |= (1 << CS01) | (1 << CS00);
     // 0-249 -> 250 * 4 = 1000us = 1ms
     OCR0A = 249;
     TIMSK0 |= (1 << OCIE0A);
     sei();
 
-    cli();
-
     _count_ms = 0;
-
-    // Set CTC mode
-    TCCR0A |= (1 << WGM01);
-
-    //
-    TCCR0B = 0;
-
-    // 249 b/c 16MHz/64 = 250kHz -> 1000/4us = 250 -> 249 for base 0 system
-    OCR0A = 249;
-
-    TIMSK0 |= (1 << OCIE0A);
-    
-    // Start timer w/ prescaler=64
-    TCCR0B |= (1 << CS01) | (1 << CS00);
-
-    sei();
 }
 
 /**

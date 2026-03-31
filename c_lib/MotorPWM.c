@@ -4,13 +4,6 @@
 
 extern Filter_Data_t battery_filter;
 
-// Initialize Variables
-static int16_t left_pwm = 0;
-static int16_t right_pwm = 0;
-static uint16_t max_pwm = 0;
-static bool pwm_enabled = false;
-
-
 /**
  * Function Initialize_Motor_PWM initializes the motor PWM on Timer 1 for PWM based voltage control of the motors.
  * The Motor PWM system shall initialize in the disabled state for safety reasons. You should specifically enable
@@ -19,6 +12,8 @@ static bool pwm_enabled = false;
  */
 void Initialize_MotorPWM( uint16_t MAX_PWM )
 {    
+    PRR0 &= ~(1<<PRTIM1);
+
     // Timer Setup
     TCCR1A = 0;
     TCCR1B = 0;
@@ -30,7 +25,7 @@ void Initialize_MotorPWM( uint16_t MAX_PWM )
     ICR1 = MAX_PWM;
 
     TCCR1A |= (1<<WGM11);
-    TCCR1B |= (1<<WGM12) | (1<<WGM13); // Might want to remove WGM12
+    TCCR1B |= (1<<WGM13); // Might want to remove WGM12
 
     TCCR1B |= (1<<CS10);
 
@@ -47,14 +42,11 @@ void Initialize_MotorPWM( uint16_t MAX_PWM )
  */
 void MotorPWM_Enable( bool enable )
 {
-    pwm_enabled = enable;
-
     if(enable){
         TCCR1A |= (1<<COM1A1) | (1<<COM1B1);
     }
     else{
         TCCR1A &= ~(1<<COM1A1) | (1<<COM1B1);
-        //PORTB &= ~((1 << 6) | (1 << 5));
     }
 }
 
@@ -64,7 +56,8 @@ void MotorPWM_Enable( bool enable )
  */
 bool MotorPWM_Is_Enabled()
 {
-    return pwm_enabled;
+    uint8_t mask = (1<<COM1A1) | (1<<COM1B1);
+    return (TCCR1A & mask) == mask;
 }
 
 /**
@@ -73,24 +66,28 @@ bool MotorPWM_Is_Enabled()
  */
 void MotorPWM_Set_Left( int16_t pwm )
 {
-    if(Filter_Last_Output(&battery_filter)>4.75f)
+    if(Filter_Last_Output(&battery_filter)>4.0f)
     {
         if(!MotorPWM_Is_Enabled())
         {
             MotorPWM_Enable(true);
         }
-        if(pwm > max_pwm){
-            left_pwm = max_pwm;
-        }
-        else if(pwm < -max_pwm){
-            left_pwm = -max_pwm;
+        if(pwm >= 0)
+        {
+            PORTB &= ~(1<<PB2); //Forward
+            OCR1B = (uint16_t)(pwm);
         }
         else{
-            left_pwm = pwm;
+            PORTB |= (1<<PB2); //Backwards
+            OCR1B = (uint16_t)(-pwm);
         }
-
-        uint16_t duty = (left_pwm >=0) ? left_pwm : -left_pwm;
-        OCR1A = duty;
+    }
+    else
+    {
+        if(MotorPWM_Is_Enabled())
+        {
+            MotorPWM_Enable(false);
+        }
     }
 }
 
@@ -100,24 +97,29 @@ void MotorPWM_Set_Left( int16_t pwm )
  */
 void MotorPWM_Set_Right( int16_t pwm )
 {
-    if(Filter_Last_Output(&battery_filter)>4.75f)
+    if(Filter_Last_Output(&battery_filter)>4.0f)
     {
         if(!MotorPWM_Is_Enabled())
         {
             MotorPWM_Enable(true);
         }
-        if(pwm > max_pwm){
-            right_pwm = max_pwm;
+        if(pwm >= 0)
+        {
+            PORTB &= ~(1<<PB1); //Forward
+            OCR1A = (uint16_t)(pwm);
         }
-        else if(pwm < -max_pwm){
-            right_pwm = -max_pwm;
+        else
+        {
+            PORTB |= (1<<PB1); //Backwards
+            OCR1A = (uint16_t)(-pwm);
         }
-        else{
-            right_pwm = pwm;
+    }
+    else
+    {
+        if(MotorPWM_Is_Enabled())
+        {
+            MotorPWM_Enable(false);
         }
-
-        uint16_t duty = (right_pwm >=0) ? right_pwm : -right_pwm;
-        OCR1B = duty;
     }
 }
 
@@ -128,7 +130,14 @@ void MotorPWM_Set_Right( int16_t pwm )
  */
 int16_t MotorPWM_Get_Left()
 {
-    return left_pwm;
+    if(PORTB & (1<<PB2))
+    {
+        return -(int16_t)OCR1B; //reverse
+    }
+    else
+    {
+        return (int16_t)OCR1B;
+    }
 }
 
 /**
@@ -138,8 +147,14 @@ int16_t MotorPWM_Get_Left()
  */
 int16_t MotorPWM_Get_Right()
 {
-    return right_pwm;
-}
+    if(PORTB & (1<<PB1))
+    {
+        return -(int16_t)OCR1A; //reverse
+    }
+    else
+    {
+        return (int16_t)OCR1A;
+    }}
 
 /**
  * Function MotorPWM_Get_Max() returns the PWM count that corresponds to 100 percent duty cycle (all on), this is the
@@ -147,7 +162,7 @@ int16_t MotorPWM_Get_Right()
  */
 uint16_t MotorPWM_Get_Max()
 {
-    return max_pwm;
+    return ICR1;
 }
 
 /**
@@ -157,15 +172,12 @@ uint16_t MotorPWM_Get_Max()
  */
 void MotorPWM_Set_Max( uint16_t MAX_PWM )
 {
-    max_pwm = MAX_PWM;
+    MAX_PWM = MAX_PWM;
     
     //Reset Timer
     TCNT1 = 0;
     OCR1A = 0;
     OCR1B = 0;
 
-    ICR1 = max_pwm;
-
-    //MototPWM_Set_Left(left_pwm);
-    //MototPWM_Set_Right(right_pwm);
+    ICR1 = MAX_PWM;
 }

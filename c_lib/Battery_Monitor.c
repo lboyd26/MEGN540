@@ -47,6 +47,5 @@ float Battery_Voltage()
     data.split.LSB = ADCL;
     data.split.MSB = ADCH;
 
-
     return data.value * BITS_TO_BATTERY_VOLTS;
 }
