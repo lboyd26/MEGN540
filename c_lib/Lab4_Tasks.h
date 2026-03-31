@@ -44,6 +44,9 @@
 
 // Put your lab-specific tasks here
 // e.g. Task_t task_restart;  ///<-- Lab 1: This flag indicates that the device received a restart command from the hoast. Default inactive.
+Task_t task_stop_pwm;
+Task_t task_send_identification_loop;
+//Task_t task_schedule_pwm_stop;
 
 Task_t task_stop_pwm;
 Task_t task_send_pwm_id_loop;

@@ -178,6 +178,5 @@ void MotorPWM_Set_Max( uint16_t MAX_PWM )
     TCNT1 = 0;
     OCR1A = 0;
     OCR1B = 0;
-
     ICR1 = MAX_PWM;
 }
